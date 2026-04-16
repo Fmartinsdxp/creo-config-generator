@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creo Config.pro Generator v3</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c14;--bg2:#0f1621;--bg3:#151d2e;--bg4:#1a2540;--bd:#1c2a42;--ac:#2d7ff9;--acd:rgba(45,127,249,.12);--acg:rgba(45,127,249,.25);--tx:#c8d3e0;--txd:#5a6a80;--txb:#eaf0f6;--ok:#00d68f;--okd:rgba(0,214,143,.1);--wn:#ffb020;--wnd:rgba(255,176,32,.08);--er:#ff4757;--mono:'IBM Plex Mono','Consolas',monospace;--sans:'DM Sans',-apple-system,'Segoe UI',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.hdr{background:linear-gradient(135deg,#061024,#0a1628,#0d1a30);border-bottom:1px solid var(--bd);padding:20px 24px;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;top:-50%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,var(--acd),transparent 70%);pointer-events:none}
+.hi{max-width:740px;margin:0 auto;display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.logo{width:42px;height:42px;background:linear-gradient(135deg,var(--ac),#1a5fd4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:20px;color:#fff;flex-shrink:0;box-shadow:0 4px 20px rgba(45,127,249,.3)}
+.hdr h1{font-size:17px;font-weight:700;color:var(--txb);letter-spacing:-.03em}.hdr p{font-size:12px;color:var(--txd);margin-top:2px}
+.pb{background:var(--bg2);border-bottom:1px solid var(--bd);padding:12px 24px;overflow-x:auto}
+.pi{max-width:740px;margin:0 auto;display:flex;align-items:center}
+.si{display:flex;align-items:center;gap:6px;white-space:nowrap;transition:opacity .3s}.si.ck{cursor:pointer}.si.off{opacity:.3}
+.sd{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600;color:#fff;flex-shrink:0;transition:all .3s;border:2px solid var(--bd);background:var(--bg3)}
+.sd.on{border-color:var(--ac);background:var(--ac);box-shadow:0 0 10px var(--acg)}.sd.dn{border-color:var(--ok);background:var(--ok)}
+.sl{font-size:10px;font-weight:600;color:var(--txd)}.si.cur .sl{color:var(--txb)}
+.sc{flex:1;height:2px;margin:0 8px;background:var(--bd);border-radius:1px;min-width:10px;transition:background .3s}.sc.dn{background:var(--ok)}
+.ct{max-width:740px;margin:0 auto;padding:20px 20px 40px}
+.sh h2{font-size:20px;font-weight:700;color:var(--txb);letter-spacing:-.03em;display:flex;align-items:center;gap:10px}
+.sh h2 span{font-size:22px}.sh p{color:var(--txd);font-size:12px;margin-top:3px}.sh{margin-bottom:16px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:16px}
+.sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txd);margin:20px 0 8px}.sec:first-child{margin-top:0}
+.ig{margin-bottom:12px}.ig label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--txd);margin-bottom:4px}
+.ig input,.ig select,.ig textarea{width:100%;padding:8px 12px;border-radius:8px;border:1.5px solid var(--bd);background:var(--bg3);color:var(--tx);font-size:12px;font-family:var(--sans);outline:none;transition:border .2s}
+.ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--ac)}.ig input::placeholder,.ig textarea::placeholder{color:var(--txd)}
+.ig textarea{font-family:var(--mono);font-size:11px;resize:vertical;min-height:80px}
+.ig .ht{font-size:10px;color:var(--txd);margin-top:3px;line-height:1.4}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:7px}.og.s1{grid-template-columns:1fr}.og.s3{grid-template-columns:repeat(3,1fr)}.og.s4{grid-template-columns:repeat(4,1fr)}
+.oc{padding:10px 12px;border-radius:9px;border:1.5px solid var(--bd);background:var(--bg3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:9px}
+.oc:hover{background:var(--bg4)}.oc.sel{border-color:var(--ac);background:var(--acd)}
+.oc .ic{font-size:16px;flex-shrink:0}.oc .lb{font-weight:600;font-size:12px;color:var(--tx)}.oc.sel .lb{color:var(--txb)}
+.oc .sb{font-size:10px;color:var(--txd);margin-top:1px;line-height:1.3}.oc .rd{width:15px;height:15px;border-radius:50%;border:2px solid var(--bd);flex-shrink:0;margin-left:auto;transition:all .15s;position:relative}
+.oc.sel .rd{border-color:var(--ac);background:var(--ac)}.oc.sel .rd::after{content:'';width:5px;height:5px;border-radius:50%;background:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.cc{padding:9px 12px;border-radius:9px;border:1.5px solid var(--bd);background:var(--bg3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px}
+.cc:hover{background:var(--bg4)}.cc.chk{border-color:var(--ac);background:var(--acd)}
+.cb{width:15px;height:15px;border-radius:4px;border:2px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cc.chk .cb{border-color:var(--ac);background:var(--ac)}.cb svg{opacity:0}.cc.chk .cb svg{opacity:1}
+.cc .ic{font-size:14px}.cc .lb{font-weight:600;font-size:12px;color:var(--tx)}.cc.chk .lb{color:var(--txb)}.cc .sb{font-size:10px;color:var(--txd);margin-top:1px}
+.nav{display:flex;gap:10px;justify-content:space-between}
+.btn{padding:10px 24px;border-radius:9px;font-family:var(--sans);font-weight:600;font-size:12px;cursor:pointer;transition:all .2s;border:none;outline:none}
+.bb{background:var(--bg3);color:var(--tx);border:1.5px solid var(--bd)}.bb:hover{background:var(--bg4)}.bb:disabled{opacity:.4;cursor:not-allowed}
+.bn{background:linear-gradient(135deg,var(--ac),#1a5fd4);color:#fff;box-shadow:0 4px 14px rgba(45,127,249,.3)}.bn:hover{box-shadow:0 6px 20px rgba(45,127,249,.4);transform:translateY(-1px)}.bn:disabled{background:var(--bg3);color:var(--txd);box-shadow:none;cursor:not-allowed;transform:none}
+.bd{flex:1;background:linear-gradient(135deg,var(--ac),#1a5fd4);color:#fff;box-shadow:0 4px 14px rgba(45,127,249,.3)}
+.bc{background:var(--bg3);color:var(--tx);border:1.5px solid var(--bd);min-width:95px}.bc.cp{border-color:var(--ok);color:var(--ok);background:var(--okd)}
+.br{width:100%;background:var(--bg3);color:var(--tx);border:1.5px solid var(--bd)}.br:hover{background:var(--bg4)}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.sb2{border-radius:10px;padding:12px;text-align:center;border:1px solid var(--bd)}.sb2 .nm{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1}.sb2 .la{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txd);margin-top:3px}
+.tw{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}.tg{padding:2px 8px;border-radius:20px;font-size:10px;background:var(--bg3);color:var(--txd);border:1px solid var(--bd)}
+.cp2{background:#0a0f18;border-radius:10px;border:1px solid var(--bd);max-height:350px;overflow-y:auto;padding:10px 0}
+.cl{display:flex;padding:0 12px;line-height:1.7;font-family:var(--mono);font-size:11px}.cl:hover{background:rgba(255,255,255,.02)}
+.ln{color:#2a3548;min-width:30px;text-align:right;margin-right:10px;user-select:none;font-size:10px}
+.wb{margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--wnd);border:1px solid rgba(255,176,32,.2);font-size:11px;color:var(--wn);line-height:1.5}
+.tip{background:rgba(45,127,249,.06);border:1px solid rgba(45,127,249,.15);border-radius:8px;padding:9px 12px;font-size:10px;color:var(--ac);line-height:1.5;margin-top:8px}
+.tip2{background:rgba(0,214,143,.06);border:1px solid rgba(0,214,143,.15);border-radius:8px;padding:9px 12px;font-size:10px;color:var(--ok);line-height:1.5;margin-top:8px}
+.etip{background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.15);border-radius:8px;padding:9px 12px;font-size:10px;color:var(--er);line-height:1.4;margin-top:8px}
+.envbox{background:#0a0f18;border:1px solid var(--bd);border-radius:8px;padding:12px;margin-top:8px;font-family:var(--mono);font-size:11px;line-height:1.7;color:#a5d6ff;white-space:pre-wrap}
+.ft{text-align:center;padding:16px;font-size:10px;color:var(--txd);border-top:1px solid var(--bd);margin-top:40px}
+.drop{border:2px dashed var(--bd);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
+.drop:hover,.drop.over{border-color:var(--ac);background:var(--acd)}
+.drop .ic2{font-size:32px;margin-bottom:8px}.drop .lb2{font-size:13px;color:var(--tx);font-weight:600}.drop .sb2a{font-size:11px;color:var(--txd);margin-top:4px}
+.tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid var(--bd)}
+.tab{padding:8px 16px;font-size:12px;font-weight:600;color:var(--txd);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab.active{color:var(--ac);border-bottom-color:var(--ac)}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}.fi{animation:fi .25s ease-out}
+@media(max-width:600px){.og,.og.s3,.og.s4{grid-template-columns:1fr}.sl{display:none}.sg{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="hdr"><div class="hi"><div class="logo">C</div><div><h1>Creo Config.pro Generator</h1><p>Generate optimized configurations based on your environment — Built on PTC Community best practices</p></div></div></div>
+<div class="pb"><div class="pi" id="pb"></div></div>
+<div class="ct"><div class="sh" id="sh"></div><div class="card fi" id="sc"></div><div id="na"></div></div>
+<div class="ft">Creo Config.pro Generator v3.0 &bull; PTC Community best practices &bull; 2082+ settings database</div>
+
+<script>
+const ST=[
+{id:'env',t:'Company & Standards',st:'Company profile, global locations, units',ic:'🏢'},
+{id:'hw',t:'Hardware & Network',st:'Workstation specs, infrastructure, connectivity',ic:'🖥️'},
+{id:'use',t:'Design Workflows',st:'How Creo is used, assembly complexity',ic:'⚙️'},
+{id:'sw',t:'Software & Licensing',st:'Creo version, PLM system, license setup',ic:'🌐'},
+{id:'perf',t:'Performance Tuning',st:'Display, graphics, and optimization preferences',ic:'⚡'},
+{id:'dirs',t:'Directories & Migration',st:'File paths, search paths, CAD migration',ic:'📁'},
+{id:'res',t:'Generated Output',st:'config.pro + Windows environment variables',ic:'📄'}
+];
+let step=0,resTab='config',showIntro=true;
+let P={company:'',location:'',users:'',isGlobal:'no',numLocations:'1',sameInfra:'yes',
+units:'mmns',standard:'iso',
+ram:'32gb',gpu:'mid',cpu:'mid',infra:'physical',network:'local',
+usage:['part_design'],asmSize:'medium',drawComplexity:'standard',
+version:'10',plm:'none',
+licType:'floating',licPort:'7788',
+workDir:'C:\\Users\\%username%\\creo_work',templateDir:'',materialDir:'',formatDir:'',searchPath:'',
+displayStyle:'shading_with_edges',antiAlias:'on',lod:'yes',
+crashPrevent:'yes',multiRegionSync:'no',
+migrationFrom:'none',migrationConfig:''
+};
+
+// ═══ RULES (100+ with version checks) ═══
+const R=[
+// DISPLAY
+{n:'display',v:'shadewithedges',c:{displayStyle:['shading_with_edges']},cat:'Model Display',d:'Default: shading with edges'},
+{n:'display',v:'shade',c:{displayStyle:['shading']},cat:'Model Display',d:'Default: shading only'},
+{n:'display',v:'wireframe',c:{displayStyle:['wireframe']},cat:'Model Display',d:'Default: wireframe'},
+{n:'shade_quality',v:'3',c:{gpu:['high']},cat:'Model Display',d:'Shade quality 3 (high GPU)'},
+{n:'shade_quality',v:'1',c:{gpu:['mid']},cat:'Model Display',d:'Shade quality 1 (mid GPU)'},
+{n:'shade_quality',v:'0',c:{gpu:['low']},cat:'Model Display',d:'Shade quality 0 (performance mode)'},
+{n:'shade_surface_feat',v:'yes',c:{gpu:['high','mid']},cat:'Model Display',d:'Surface shading enabled'},
+{n:'shade_with',v:'reflections',c:{gpu:['high']},cat:'Model Display',d:'Reflections in shaded mode'},
+{n:'shade_with',v:'shading',c:{gpu:['mid','low']},cat:'Model Display',d:'Basic shading'},
+{n:'spin_with_silhouette_edges',v:'yes',c:{gpu:['high']},cat:'Model Display',d:'Silhouette edges during spin'},
+{n:'spin_with_silhouette_edges',v:'no',c:{gpu:['mid','low']},cat:'Model Display',d:'No silhouette during spin'},
+{n:'display_silhouette_edges',v:'yes',c:{gpu:['high','mid']},cat:'Model Display',d:'Show silhouette edges'},
+{n:'display_silhouette_edges',v:'no',c:{gpu:['low']},cat:'Model Display',d:'No silhouette edges'},
+{n:'edge_display_quality',v:'high',c:{gpu:['high']},cat:'Model Display',d:'High quality edges'},
+{n:'edge_display_quality',v:'normal',c:{gpu:['mid','low']},cat:'Model Display',d:'Normal edge quality'},
+{n:'enable_fsaa',v:'yes',c:{antiAlias:['on'],gpu:['high','mid']},cat:'Model Display',d:'Full-scene anti-aliasing ON'},
+{n:'enable_fsaa',v:'no',c:{antiAlias:['off']},cat:'Model Display',d:'Anti-aliasing OFF'},
+{n:'smooth_lines',v:'no',c:{any:true},cat:'Model Display',d:'Disable smooth lines (performance)'},
+{n:'lod_enabled',v:'yes',c:{lod:['yes']},cat:'Model Display',d:'Level of Detail enabled'},
+
+// SYSTEM / MEMORY
+{n:'proe_memory_buffer_size',v:'128',c:{ram:['64gb','128gb']},cat:'System',d:'128MB memory buffer'},
+{n:'proe_memory_buffer_size',v:'75',c:{ram:['32gb']},cat:'System',d:'75MB memory buffer'},
+{n:'proe_memory_buffer_size',v:'50',c:{ram:['16gb']},cat:'System',d:'50MB memory buffer'},
+{n:'enable_opengl_fbo',v:'no',c:{infra:['vdi']},cat:'System',d:'Disable OpenGL FBO (VDI fix)'},
+
+// ASSEMBLY
+{n:'simprep_default_model_status',v:'geometry',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Default geometry rep (large assy)'},
+{n:'simprep_default_model_status',v:'master',c:{asmSize:['small','medium']},cat:'Assembly',d:'Default master rep'},
+{n:'simprep_ondemand_settings',v:'never_prompt',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Auto on-demand retrieval'},
+{n:'simprep_ondemand_selection',v:'automatic',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Min rep auto-retrieve'},
+{n:'open_simplified_rep_by_default',v:'yes',c:{asmSize:['large','very_large']},cat:'File Storage',d:'Prompt for simplified rep'},
+{n:'open_simplified_rep_by_default',v:'no',c:{asmSize:['small','medium']},cat:'File Storage',d:'Open master rep default'},
+{n:'use_3d_thumbnail_in_lwg_rep',v:'yes',c:{asmSize:['large','very_large']},cat:'Assembly',d:'3D thumbnails in LWG'},
+{n:'enable_creo_simulation_live',v:'no',c:{asmSize:['large','very_large']},cat:'Assembly',d:'SimLive OFF (large assy perf)'},
+{n:'enable_creo_simulation_live',v:'yes',c:{usage:['simulation']},cat:'Assembly',d:'SimLive ON for analysis'},
+{n:'search_not_retrieved_models',v:'no',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Skip unretrieved search'},
+{n:'allow_freeze_failed_assy_comp',v:'yes',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Freeze failed components'},
+{n:'allow_save_failed_model',v:'prompt',c:{any:true},cat:'Assembly',d:'Prompt on failed model save'},
+{n:'comp_assemble_start',v:'move_then_place',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Move then place (large assy)'},
+{n:'dim_inactive_components',v:'shaded_only',c:{any:true},cat:'Assembly',d:'Dim inactive in shaded'},
+{n:'clearance_triangulation',v:'medium',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Medium clearance triangulation'},
+{n:'create_temp_interfaces',v:'no',c:{asmSize:['large','very_large']},cat:'Assembly',d:'No temp interfaces (perf)'},
+{n:'autoplace_single_comp',v:'no',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Disable auto-place'},
+{n:'auto_place_max_number',v:'1',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Limit placement matches'},
+{n:'check_interference_of_matches',v:'no',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Skip interference check'},
+{n:'interface_quality',v:'0',c:{asmSize:['large','very_large']},cat:'Assembly',d:'No overlap line checks'},
+{n:'enable_auto_regen',v:'no',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Auto-regen OFF (large assy)'},
+{n:'enable_auto_regen',v:'yes',c:{asmSize:['small','medium']},cat:'Assembly',d:'Auto-regen ON'},
+
+// DRAWING
+{n:'save_display',v:'yes',c:{usage:['drawing']},cat:'Drawing',d:'Save display (fast retrieval)'},
+{n:'auto_regen_views',v:'no',c:{usage:['drawing']},cat:'Drawing',d:'Manual regen (REQUIRED)'},
+{n:'preferred_export_format',v:'pdf',c:{usage:['drawing']},cat:'Drawing',d:'Default export: PDF'},
+{n:'highlight_new_dims',v:'yes',c:{usage:['drawing']},cat:'Drawing',d:'Highlight new dims'},
+{n:'create_drawing_dims_only',v:'yes',c:{usage:['drawing']},cat:'Drawing',d:'Save dims in drawing'},
+{n:'enable_shaded_view_in_drawings',v:'yes',c:{usage:['drawing'],gpu:['high','mid']},cat:'Drawing',d:'Shaded views in drawings'},
+{n:'save_drawing_picture_file',v:'embed',c:{usage:['drawing']},cat:'Drawing',d:'Embed preview picture'},
+{n:'fasthlr_drawing',v:'yes',c:{drawComplexity:['heavy']},cat:'Drawing',d:'Fast HLR in drawing mode'},
+{n:'display_in_adding_view',v:'minimal_wireframe',c:{drawComplexity:['heavy']},cat:'Drawing',d:'Minimal wireframe adding views'},
+{n:'disp_trimetric_dwg_mode_view',v:'no',c:{drawComplexity:['heavy']},cat:'Drawing',d:'No trimetric in drawing'},
+
+// SIMULATION
+{n:'sim_solver_memory_allocation',v:'2048',c:{ram:['64gb','128gb'],usage:['simulation']},cat:'Simulate',d:'2GB solver memory'},
+{n:'sim_solver_memory_allocation',v:'1024',c:{ram:['32gb'],usage:['simulation']},cat:'Simulate',d:'1GB solver memory'},
+{n:'creo_ansys_solver_cores',v:'4',c:{cpu:['high'],usage:['simulation']},cat:'Simulate',d:'4 Ansys solver cores'},
+{n:'creo_ansys_solver_cores',v:'2',c:{cpu:['mid'],usage:['simulation']},cat:'Simulate',d:'2 Ansys solver cores'},
+
+// ADDITIVE
+{n:'3dp_multithread_slicing',v:'8',c:{cpu:['high'],usage:['additive']},cat:'Additive Mfg',d:'8 slice threads'},
+{n:'3dp_multithread_slicing',v:'4',c:{cpu:['mid'],usage:['additive']},cat:'Additive Mfg',d:'4 slice threads'},
+
+// UNITS
+{n:'pro_unit_sys',v:'mmns',c:{units:['mmns']},cat:'Environment',d:'Unit system: mmNs'},
+{n:'pro_unit_sys',v:'mmks',c:{units:['mmks']},cat:'Environment',d:'Unit system: mmKs'},
+{n:'pro_unit_sys',v:'mks',c:{units:['mks']},cat:'Environment',d:'Unit system: MKS'},
+{n:'pro_unit_sys',v:'ips',c:{units:['ips']},cat:'Environment',d:'Unit system: IPS'},
+{n:'pro_unit_length',v:'unit_mm',c:{units:['mmns','mmks']},cat:'Environment',d:'Length: mm'},
+{n:'pro_unit_length',v:'unit_m',c:{units:['mks']},cat:'Environment',d:'Length: m'},
+{n:'pro_unit_length',v:'unit_inch',c:{units:['ips']},cat:'Environment',d:'Length: inch'},
+{n:'pro_unit_mass',v:'unit_kilogram',c:{units:['mmks','mks']},cat:'Environment',d:'Mass: kg'},
+{n:'pro_unit_mass',v:'unit_pound',c:{units:['ips']},cat:'Environment',d:'Mass: lb'},
+
+// TOLERANCES
+{n:'tolerance_standard',v:'iso',c:{standard:['iso']},cat:'Tolerances',d:'ISO tolerance'},
+{n:'tolerance_standard',v:'ansi',c:{standard:['ansi']},cat:'Tolerances',d:'ANSI tolerance'},
+{n:'default_dec_places',v:'3',c:{units:['mmns','mmks','mks']},cat:'Tolerances',d:'3 decimals (metric)'},
+{n:'default_dec_places',v:'4',c:{units:['ips']},cat:'Tolerances',d:'4 decimals (imperial)'},
+{n:'tol_display',v:'yes',c:{any:true},cat:'Tolerances',d:'Show tolerances'},
+
+// WINDCHILL
+{n:'dm_cache_limit',v:'5000',c:{plm:['windchill'],ram:['64gb','128gb']},cat:'Data Mgmt',d:'5GB Windchill cache'},
+{n:'dm_cache_limit',v:'2000',c:{plm:['windchill'],ram:['32gb']},cat:'Data Mgmt',d:'2GB Windchill cache'},
+{n:'dm_cache_limit',v:'1000',c:{plm:['windchill'],ram:['16gb']},cat:'Data Mgmt',d:'1GB Windchill cache'},
+{n:'dm_network_threads',v:'6',c:{plm:['windchill'],network:['local']},cat:'Data Mgmt',d:'6 threads (LAN)'},
+{n:'dm_network_threads',v:'3',c:{plm:['windchill'],network:['vpn','remote']},cat:'Data Mgmt',d:'3 threads (remote)'},
+{n:'dm_http_compression_level',v:'0',c:{plm:['windchill'],network:['local']},cat:'Data Mgmt',d:'No compression (LAN)'},
+{n:'dm_http_compression_level',v:'6',c:{plm:['windchill'],network:['vpn','remote']},cat:'Data Mgmt',d:'Compression level 6 (remote)'},
+{n:'dm_remember_server',v:'yes',c:{plm:['windchill']},cat:'Data Mgmt',d:'Remember server'},
+{n:'dm_upload_objects',v:'explicit',c:{plm:['windchill']},cat:'Data Mgmt',d:'Explicit upload'},
+{n:'dm_offline_after_event',v:'yes',c:{plm:['windchill']},cat:'Data Mgmt',d:'Allow offline on disconnect'},
+{n:'dm_network_request_size',v:'8000000',c:{plm:['windchill'],network:['local']},cat:'Data Mgmt',d:'8MB request (LAN)'},
+{n:'dm_network_request_size',v:'4000000',c:{plm:['windchill'],network:['vpn','remote']},cat:'Data Mgmt',d:'4MB request (remote)'},
+{n:'save_bitmap',v:'alllevels',c:{plm:['windchill']},cat:'Data Mgmt',d:'Bitmaps for Windchill'},
+{n:'save_bitmap',v:'none',c:{plm:['none','other']},cat:'Data Mgmt',d:'No bitmaps'},
+{n:'generate_viewable_on_save',v:'yes',c:{plm:['windchill']},cat:'File Storage',d:'Creo View on save'},
+
+// GENERAL
+{n:'bell',v:'no',c:{any:true},cat:'Environment',d:'No keyboard bell'},
+{n:'model_tree_start',v:'yes',c:{any:true},cat:'Environment',d:'Show Model Tree'},
+{n:'display_full_object_path',v:'no',c:{any:true},cat:'Environment',d:'Object name only'},
+{n:'prehighlight',v:'yes',c:{any:true},cat:'Environment',d:'Pre-selection highlight'},
+{n:'regen_backup_using_disk',v:'yes',c:{any:true},cat:'Environment',d:'Backup before regen'},
+{n:'mass_property_calculate',v:'check_upon_save',c:{any:true},cat:'Environment',d:'Check MP on save'},
+{n:'display_annotations',v:'yes',c:{any:true},cat:'Environment',d:'Display 3D annotations'},
+{n:'show_dim_sign',v:'yes',c:{any:true},cat:'Environment',d:'Show dim signs'},
+{n:'modelcheck_enabled',v:'yes',c:{any:true},cat:'Environment',d:'ModelCHECK enabled'},
+{n:'atb_auto_check_on_retrieve',v:'off',c:{any:true},cat:'Environment',d:'ATB auto-check OFF'},
+{n:'sketcher_refit_after_dim_modify',v:'yes',c:{any:true},cat:'Sketcher',d:'Refit after dim edit'},
+{n:'sketcher_lock_modified_dims',v:'yes',c:{any:true},cat:'Sketcher',d:'Lock modified dims'},
+{n:'compress_output_files',v:'yes',c:{any:true},cat:'File Storage',d:'Compress output files'},
+{n:'rename_drawings_with_object',v:'both',c:{any:true},cat:'File Storage',d:'Rename dwgs with models'},
+{n:'intf_generate_log_file',v:'short',c:{any:true},cat:'Data Exchange',d:'Short data exchange log'},
+{n:'step_assembly_import_type',v:'assembly',c:{any:true},cat:'Data Exchange',d:'STEP import as assembly'},
+{n:'dwg_export_format',v:'2018',c:{any:true},cat:'Data Exchange',d:'DWG export 2018'},
+
+// ═══ CRASH PREVENTION (from client's real-world config) ═══
+{n:'auto_traceback',v:'always',c:{crashPrevent:['yes']},cat:'Crash Prevention',d:'Always generate traceback on errors'},
+{n:'suppress_license_loss_dialog',v:'yes',c:{crashPrevent:['yes']},cat:'Crash Prevention',d:'Suppress license loss popup'},
+{n:'regen_solid_before_save',v:'prompt',c:{crashPrevent:['yes']},cat:'Crash Prevention',d:'Prompt regen before save'},
+{n:'regen_int_mdls_on_retr',v:'no',c:{crashPrevent:['yes'],asmSize:['large','very_large']},cat:'Crash Prevention',d:'No auto-regen on retrieve (prevents crashes)'},
+{n:'clock',v:'no',c:{any:true},cat:'Environment',d:'Hide clock indicator'},
+{n:'mapkeys_execution',v:'no_feedback',c:{crashPrevent:['yes']},cat:'Environment',d:'Silent mapkey execution'},
+
+// ═══ MULTI-REGION SYNC (from client scenario: US/Germany/Norway) ═══
+{n:'dm_cache_mode',v:'none',c:{multiRegionSync:['yes']},cat:'Multi-Region Sync',d:'No local cache for consistency across regions'},
+{n:'dm_background_operations',v:'yes',c:{multiRegionSync:['yes']},cat:'Multi-Region Sync',d:'Background operations enabled'},
+{n:'dm_synchronize_in_background',v:'yes',c:{multiRegionSync:['yes']},cat:'Multi-Region Sync',d:'Background sync across regions'},
+{n:'dm_save_as_attachment',v:'yes',c:{multiRegionSync:['yes']},cat:'Multi-Region Sync',d:'Save as attachment for sync'},
+{n:'dm_emulate_ilink_sys_parameters',v:'yes',c:{multiRegionSync:['yes']},cat:'Multi-Region Sync',d:'Emulate iLink parameters'},
+{n:'dm_checkout_on_the_fly',v:'continue',c:{multiRegionSync:['yes']},cat:'Multi-Region Sync',d:'Continue without forced checkout'},
+{n:'let_proe_rename_pdm_objects',v:'yes',c:{multiRegionSync:['yes']},cat:'Multi-Region Sync',d:'Allow renaming PDM objects'},
+
+// ═══ CPU USAGE (from client config) ═══
+{n:'cpus_to_use',v:'8',c:{cpu:['high']},cat:'System',d:'Use 8 CPUs for parallel operations'},
+{n:'cpus_to_use',v:'4',c:{cpu:['mid']},cat:'System',d:'Use 4 CPUs for parallel operations'},
+{n:'cpus_to_use',v:'2',c:{cpu:['low']},cat:'System',d:'Use 2 CPUs for parallel operations'},
+
+// ═══ MASS PROPERTIES (from client config — important for global companies) ═══
+{n:'mass_property_calculate',v:'automatic',c:{multiRegionSync:['yes']},cat:'Mass Properties',d:'Auto-calculate for consistency across regions'},
+{n:'update_pro_mp_parameters',v:'yes',c:{any:true},cat:'Mass Properties',d:'Update MP parameters'},
+{n:'save_file_mass_prop',v:'yes',c:{any:true},cat:'Mass Properties',d:'Save mass properties with file'},
+{n:'update_material_properties',v:'yes',c:{any:true},cat:'Mass Properties',d:'Update material properties'},
+{n:'mass_property_dec_places',v:'3',c:{units:['mmns','mmks','mks']},cat:'Mass Properties',d:'3 decimals for MP (metric)'},
+{n:'mass_property_dec_places',v:'4',c:{units:['ips']},cat:'Mass Properties',d:'4 decimals for MP (imperial)'},
+{n:'default_density',v:'7.85',c:{standard:['iso']},cat:'Mass Properties',d:'Default density (steel, g/cm³)'},
+{n:'default_density',v:'0.283',c:{standard:['ansi']},cat:'Mass Properties',d:'Default density (steel, lb/in³)'},
+
+// ═══ UI / DISPLAY REFINEMENTS (from client config) ═══
+{n:'display_axes',v:'no',c:{any:true},cat:'Model Display',d:'Hide axes by default (cleaner view)'},
+{n:'display_coord_sys',v:'no',c:{any:true},cat:'Model Display',d:'Hide coordinate systems'},
+{n:'display_planes',v:'no',c:{any:true},cat:'Model Display',d:'Hide datum planes'},
+{n:'display_points',v:'no',c:{any:true},cat:'Model Display',d:'Hide datum points'},
+{n:'spin_with_notes',v:'no',c:{any:true},cat:'Model Display',d:'Hide notes during spin'},
+{n:'save_model_display',v:'shading_lod',c:{lod:['yes']},cat:'Model Display',d:'Save with shading + LOD'},
+{n:'auto_locate_in_tree',v:'yes',c:{any:true},cat:'Environment',d:'Auto-locate selected in tree'},
+{n:'sketcher_starts_in_2d',v:'yes',c:{any:true},cat:'Sketcher',d:'Sketcher opens in 2D mode'},
+{n:'sketcher_dim_of_revolve_axis',v:'yes',c:{any:true},cat:'Sketcher',d:'Show dims from revolve axis'},
+{n:'simprep_ondemand_regeneration',v:'disable',c:{asmSize:['large','very_large']},cat:'Assembly',d:'Disable on-demand regen (perf)'},
+{n:'freeze_failed_cable_locations',v:'yes',c:{any:true},cat:'Assembly',d:'Freeze failed cable locations'},
+
+// ═══ UI PREFERENCES ═══
+{n:'enable_3dmodelspace_browser_tab',v:'no',c:{any:true},cat:'User Interface',d:'Hide 3D ModelSpace browser tab'},
+{n:'enable_popup_help',v:'yes',c:{any:true},cat:'User Interface',d:'Enable popup help'},
+{n:'fonts_size',v:'small',c:{any:true},cat:'User Interface',d:'Small fonts (more screen space)'},
+{n:'menu_activate_on_press',v:'yes',c:{any:true},cat:'User Interface',d:'Menu activates on press'},
+{n:'web_enable_javascript',v:'off',c:{any:true},cat:'User Interface',d:'Disable JS in embedded browser (security)'},
+{n:'windows_browser_type',v:'chromium_browser',c:{version:['8','9','10','11']},cat:'User Interface',d:'Chromium browser (Creo 7+)'},
+
+// ═══ FILE STORAGE REFINEMENTS (client config) ═══
+{n:'disable_search_path_check',v:'yes',c:{multiRegionSync:['yes']},cat:'File Storage',d:'Disable search path check (speeds retrieval)'},
+{n:'file_open_preview_delay',v:'0',c:{any:true},cat:'File Storage',d:'No file preview delay'},
+{n:'force_new_file_options_dialog',v:'yes',c:{any:true},cat:'File Storage',d:'Force new file options dialog'},
+{n:'last_session_retrieval',v:'no',c:{any:true},cat:'File Storage',d:'Don\'t retrieve last session'},
+{n:'menu_show_instances',v:'no',c:{any:true},cat:'File Storage',d:'Hide instances in file menu'},
+
+// ═══ DATE FORMAT (depends on tolerance standard) ═══
+{n:'todays_date_note_format',v:'%dd-%Mmm-%yy',c:{standard:['iso']},cat:'Drawing',d:'Date format: DD-MMM-YY (ISO)'},
+{n:'todays_date_note_format',v:'%Mmm-%dd-%yy',c:{standard:['ansi']},cat:'Drawing',d:'Date format: MMM-DD-YY (ANSI)'},
+
+// ═══ GRAPHICS FROM CLIENT CONFIG ═══
+{n:'graphics',v:'opengl',c:{any:true},cat:'System',d:'OpenGL graphics (recommended by PTC)'},
+
+// VERSION SPECIFIC (Creo 10+)
+{n:'enable_learning_connector',v:'yes',c:{version:['10','11']},cat:'Environment',d:'Learning Connector (10+)'},
+{n:'enable_learning_connector',v:'no',c:{version:['8','9']},cat:'Environment',d:'Learning Connector OFF'},
+];
+
+function gen(){
+  const m=[],seen=new Set();
+  for(const r of R){if(seen.has(r.n))continue;let ok=false;
+    if(r.c.any){ok=true}else{ok=true;for(const[k,v]of Object.entries(r.c)){const pv=P[k];if(!pv){ok=false;break}
+      if(Array.isArray(pv)){if(!pv.some(x=>v.includes(x))){ok=false;break}}else{if(!v.includes(pv)){ok=false;break}}}}
+    if(ok&&r.v){seen.add(r.n);m.push(r)}}
+  m.sort((a,b)=>a.cat.localeCompare(b.cat));
+  const l=[],d=new Date().toISOString().split('T')[0];
+  l.push('!===============================================================');
+  l.push('! config.pro - Generated by Creo Config Generator v4.0');
+  l.push('! Date: '+d);l.push('! Company: '+(P.company||'N/A'));l.push('! Location: '+(P.location||'N/A'));
+  l.push('! Users: '+(P.users||'N/A')+(P.isGlobal==='yes'?' (Global: '+P.numLocations+' locations)':''));
+  l.push('! Creo: '+P.version+'.0 | HW: RAM='+P.ram+' GPU='+P.gpu+' CPU='+P.cpu);
+  l.push('! Infra: '+P.infra+' | Network: '+P.network+' | PLM: '+P.plm);
+  l.push('! License: '+P.licType+(P.licType==='floating'?' (port '+P.licPort+')':''));
+  l.push('! Assembly profile: '+P.asmSize+' | Drawing: '+P.drawComplexity);
+  if(P.crashPrevent==='yes')l.push('! Crash prevention: ENABLED');
+  if(P.multiRegionSync==='yes')l.push('! Multi-region sync: ENABLED');
+  if(P.migrationFrom!=='none')l.push('! Migration from: '+P.migrationFrom.toUpperCase());
+  l.push('!===============================================================');l.push('');
+  // Dirs
+  const dirs=[];
+  if(P.workDir)dirs.push('working_directory '+P.workDir);
+  if(P.searchPath)P.searchPath.split(';').forEach(p=>{if(p.trim())dirs.push('search_path '+p.trim())});
+  if(P.templateDir){dirs.push('template_solidpart '+P.templateDir+'\\mmns_part_solid.prt');
+    dirs.push('template_designasm '+P.templateDir+'\\mmns_asm_design.asm')}
+  if(P.materialDir)dirs.push('pro_material_dir '+P.materialDir);
+  if(P.formatDir)dirs.push('pro_format_dir '+P.formatDir);
+  if(dirs.length){l.push('!--- Directories & Paths ---');dirs.forEach(x=>l.push(x));l.push('')}
+  let cc='';for(const s of m){if(s.cat!==cc){cc=s.cat;l.push('!--- '+cc+' ---')}l.push(s.n+' '+s.v)}
+  if(P.migrationFrom!=='none'&&P.migrationConfig){l.push('');l.push('!--- Migration Notes ('+P.migrationFrom.toUpperCase()+' -> Creo) ---');
+    l.push('! Settings below were parsed from previous CAD config.');l.push('! Review carefully - not all options have direct equivalents.')}
+  l.push('');l.push('! END OF CONFIG.PRO');
+  return{content:l.join('\n'),settings:m}
+}
+
+function genEnv(){
+  const l=[];
+  l.push('REM ===============================================================');
+  l.push('REM Windows Environment Variables for Creo '+P.version+'.0');
+  l.push('REM Run this script as Administrator or set via System Properties');
+  l.push('REM ===============================================================');l.push('');
+  // License
+  if(P.licType==='floating'){
+    l.push('REM --- License Server Configuration ---');
+    l.push('REM Replace LICENSE-SERVER-HOSTNAME with your actual FlexNet server');
+    l.push('setx PTC_D_LICENSE_FILE "'+P.licPort+'@LICENSE-SERVER-HOSTNAME" /M');l.push('')}
+  else if(P.licType==='nodelocked'){
+    l.push('REM --- Node-Locked License ---');
+    l.push('REM setx PTC_D_LICENSE_FILE "C:\\PTC\\license\\license.dat" /M');l.push('')}
+  else if(P.licType==='cloud'){
+    l.push('REM --- Creo+ Cloud License ---');
+    l.push('REM No environment variable needed — configured via PTC account login');l.push('')}
+  // Creo 9+ alt settings path
+  if(parseInt(P.version)>=9){
+    l.push('REM --- Creo '+P.version+': Shared Configuration Path (Creo 9+) ---');
+    l.push('REM setx PTC_CREO_ALT_SETTINGS_PATH "\\\\server\\creo\\config" /M');l.push('')}
+  // VDI
+  if(P.infra==='vdi'){
+    l.push('REM --- VDI Environment Fixes ---');
+    l.push('setx PRO_MACHINE_TYPE "x86e_win64" /M');
+    l.push('REM Required for virtual desktops (Citrix/VMware Horizon)');l.push('')}
+  // Performance
+  l.push('REM --- Performance Recommendations ---');
+  if(P.asmSize==='large'||P.asmSize==='very_large'){
+    l.push('REM For large assemblies: set CPU affinity for xtop.exe to single core');
+    l.push('REM (Creo is mostly single-threaded for regen operations)');
+    l.push('REM Use Task Manager > Details > xtop.exe > Set Affinity');l.push('')}
+  l.push('REM --- Virtual Memory ---');
+  const vmMin=P.ram==='128gb'?'32768':P.ram==='64gb'?'16384':P.ram==='32gb'?'8192':'4096';
+  const vmMax=P.ram==='128gb'?'65536':P.ram==='64gb'?'32768':P.ram==='32gb'?'16384':'8192';
+  l.push('REM Recommended pagefile: Initial='+vmMin+'MB / Maximum='+vmMax+'MB');
+  l.push('REM Set via: System Properties > Advanced > Performance > Virtual Memory');l.push('');
+  l.push('REM --- Graphics Driver ---');
+  l.push('REM Ensure NVIDIA/AMD driver is PTC-certified for Creo '+P.version+'.0');
+  l.push('REM Check: https://www.ptc.com/en/support/hardware-certification');l.push('');
+  if(P.plm==='windchill'){
+    l.push('REM --- Windchill Cache Location ---');
+    l.push('REM setx PTC_WF_ROOT "D:\\CreoCache" /M');
+    l.push('REM Move cache to faster drive (SSD) for better performance');l.push('')}
+  l.push('REM --- Windows Power Settings ---');
+  l.push('REM Set Power Plan to "High Performance" (especially laptops)');
+  l.push('REM powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c');l.push('');
+  l.push('pause');
+  return l.join('\n')
+}
+
+// ═══ RENDER ═══
+function render(){
+  if(showIntro){renderIntro();return}
+  document.getElementById('pb').style.display='';
+  rP();rH();rC();rN()
+}
+function renderIntro(){
+  document.getElementById('pb').style.display='none';
+  document.getElementById('sh').innerHTML='';
+  document.getElementById('na').innerHTML='';
+  const e=document.getElementById('sc');
+  e.className='card fi';
+  e.innerHTML=sIntro();
+}
+function sIntro(){
+  return `<div style="text-align:center;margin-bottom:24px">
+    <div style="font-size:48px;margin-bottom:8px">⚙️</div>
+    <h2 style="font-size:24px;font-weight:700;color:var(--txb);letter-spacing:-.03em;margin-bottom:6px">Welcome to Creo Config.pro Generator</h2>
+    <p style="color:var(--txd);font-size:13px;line-height:1.6;max-width:500px;margin:0 auto">Before we start — here's what you need to know about the config.pro file and how it should be managed in your organization.</p>
+  </div>
+
+  <div class="sec">📌 Why config.pro Matters</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:16px">
+    The <b style="color:var(--txb)">config.pro</b> is a text file where Creo Parametric stores all the settings that define how it behaves — from units and tolerance standards to display quality, search paths, performance tuning, PLM integration, and over 2,000 other options. According to PTC documentation, config.pro is the single most important file for <b style="color:var(--ac)">standardizing CAD behavior across your organization</b>, ensuring data consistency, and optimizing performance for your specific hardware and workflows.
+  </div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:16px">
+    A well-designed config.pro prevents the "every user has different settings" chaos, reduces file corruption risks, speeds up large assembly retrieval, standardizes drawing outputs across sites, and dramatically reduces support tickets from end users.
+  </div>
+
+  <div class="sec">📂 How config.pro Is Typically Managed</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:12px">
+    PTC recommends a <b style="color:var(--txb)">layered configuration approach</b>. Creo reads config files in this order (later ones override earlier):
+  </div>
+  <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:16px;font-size:11px;line-height:1.9">
+    <div><b style="color:var(--ac)">1.</b> <code>&lt;Creo install&gt;\\text\\config.pro</code> — Installation defaults</div>
+    <div><b style="color:var(--ac)">2.</b> <code>&lt;Creo install&gt;\\text\\config.sup</code> — Admin-locked settings (cannot be overridden)</div>
+    <div><b style="color:var(--ac)">3.</b> <code>%USERPROFILE%\\config.pro</code> — User's home directory</div>
+    <div><b style="color:var(--ac)">4.</b> <code>&lt;Start-In directory&gt;\\config.pro</code> — Last read, highest priority</div>
+  </div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:16px">
+    Most organizations deploy the main config.pro via a <b style="color:var(--txb)">network share</b> or <b style="color:var(--txb)">launch script</b> (parametric.bat) that copies the latest version from a central server before Creo starts. From Creo 9 onward, the <code>PTC_CREO_ALT_SETTINGS_PATH</code> environment variable simplifies this deployment.
+  </div>
+
+  <div class="sec">👥 Who Should Own This File</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:12px">
+    PTC identifies specific roles responsible for config.pro management in their <i>Configure and Customize Creo Parametric</i> success path:
+  </div>
+  <div style="display:grid;gap:8px;margin-bottom:16px">
+    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px">
+      <div style="font-weight:600;color:var(--txb);font-size:12px;margin-bottom:3px">🎯 CAD Administrator (Primary Owner)</div>
+      <div style="font-size:11px;color:var(--txd);line-height:1.5">Responsible for creating, testing, maintaining, and deploying config.pro. Ensures settings align with company standards and user needs. This is the main contact for end users facing config-related issues.</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px">
+      <div style="font-weight:600;color:var(--txb);font-size:12px;margin-bottom:3px">🔧 Systems Administrator (IT)</div>
+      <div style="font-size:11px;color:var(--txd);line-height:1.5">Handles the underlying infrastructure — network shares, file permissions on config.sup, Windows environment variables, license server, and deployment scripts. Works alongside the CAD Admin.</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px">
+      <div style="font-weight:600;color:var(--txb);font-size:12px;margin-bottom:3px">🏆 Technical Lead / CAD Champion</div>
+      <div style="font-size:11px;color:var(--txd);line-height:1.5">Senior designer who understands business processes and defines which settings matter for the team. Validates that config.pro supports actual design workflows.</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px">
+      <div style="font-weight:600;color:var(--txb);font-size:12px;margin-bottom:3px">🧪 Testing Team</div>
+      <div style="font-size:11px;color:var(--txd);line-height:1.5">Validates config.pro changes before production rollout. Especially critical during Creo version upgrades where some settings change or become deprecated.</div>
+    </div>
+  </div>
+
+  <div class="tip" style="margin-top:16px">💡 <b>PTC recommendation:</b> For companies without a dedicated CAD Admin, PTC suggests establishing an internal "help desk" function — either within IT or engineering — staffed with trained personnel who can handle Creo configuration, troubleshoot user issues, and coordinate with PTC Technical Support when needed.</div>
+
+  <div class="tip2" style="margin-top:10px">✅ <b>This tool helps you:</b> Generate a config.pro tailored to your specific environment (hardware, workflows, PLM, global locations) based on PTC-recommended settings and real-world community best practices — giving your CAD Admin a solid starting point instead of a blank file with 2,000+ options.</div>
+
+  <div style="margin-top:24px;text-align:center">
+    <button class="btn bn" style="padding:14px 36px;font-size:14px" onclick="startWizard()">Start Configuration Wizard →</button>
+  </div>`
+}
+function startWizard(){showIntro=false;step=0;render();scrollTo(0,0)}
+function rP(){const e=document.getElementById('pb');let h='';ST.forEach((s,i)=>{
+  h+=`<div class="si ${i<step?'ck':''} ${i===step?'cur':''} ${i>step?'off':''}" ${i<step?'onclick="go('+i+')"':''}>
+    <div class="sd ${i<step?'dn':i===step?'on':''}">${i<step?'✓':i+1}</div><span class="sl">${s.t}</span></div>`;
+  if(i<ST.length-1)h+=`<div class="sc ${i<step?'dn':''}"></div>`});e.innerHTML=h}
+function rH(){const s=ST[step];document.getElementById('sh').innerHTML=`<h2><span>${s.ic}</span> ${s.t}</h2><p>${s.st}</p>`}
+function rC(){const e=document.getElementById('sc');e.className='card fi';
+  [sEnv,sHw,sUse,sSw,sPerf,sDirs,sRes][step](e)}
+function rN(){const e=document.getElementById('na');
+  if(step===ST.length-1){e.innerHTML='<button class="btn br" onclick="go(0)">← Start over with new profile</button>';return}
+  e.innerHTML=`<div class="nav"><button class="btn bb" ${step===0?'disabled':''} onclick="prev()">← Back</button>
+  <button class="btn bn" onclick="next()">${step===ST.length-2?'Generate Output →':'Next →'}</button></div>`}
+
+// Helpers
+const oc=(v,lb,sb,ic,sel,fn)=>`<div class="oc ${sel?'sel':''}" onclick="${fn}">${ic?'<span class="ic">'+ic+'</span>':''}<div><div class="lb">${lb}</div>${sb?'<div class="sb">'+sb+'</div>':''}</div><div class="rd"></div></div>`;
+const cc2=(v,lb,sb,ic,chk,fn)=>`<div class="cc ${chk?'chk':''}" onclick="${fn}"><div class="cb"><svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>${ic?'<span class="ic">'+ic+'</span>':''}<div><div class="lb">${lb}</div>${sb?'<div class="sb">'+sb+'</div>':''}</div></div>`;
+const inp=(id,lb,ph,v,ht)=>`<div class="ig"><label>${lb}</label><input id="${id}" value="${v||''}" placeholder="${ph}" oninput="P['${id}']=this.value">${ht?'<div class="ht">'+ht+'</div>':''}</div>`;
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// ═══ STEP RENDERERS ═══
+function sEnv(el){
+  el.innerHTML=inp('company','Company Name','e.g. Acme Engineering',P.company)
+  +inp('location','Primary Location','e.g. Houston, TX',P.location)
+  +inp('users','Number of Creo Licenses','e.g. 50',P.users)
+  +'<div class="sec">Global Company?</div><div class="og">'
+  +oc('no','Single Location','One office / one site','🏢',P.isGlobal==='no',"sv('isGlobal','no')")
+  +oc('yes','Global / Multi-Site','Multiple offices in different regions','🌍',P.isGlobal==='yes',"sv('isGlobal','yes')")+'</div>'
+  +(P.isGlobal==='yes'?
+    inp('numLocations','Number of Locations','e.g. 3 (US, Germany, Norway)',P.numLocations)
+    +'<div class="sec">Same hardware/infra across all locations?</div><div class="og">'
+    +oc('yes','Yes, standardized','All sites use same workstation specs','✅',P.sameInfra==='yes',"sv('sameInfra','yes')")
+    +oc('no','No, varies by site','Different hardware at different locations','⚠️',P.sameInfra==='no',"sv('sameInfra','no')")+'</div>'
+    +(P.sameInfra==='no'?'<div class="etip">⚠️ <b>Important:</b> When locations have different hardware, consider generating a separate config.pro per site. This tool generates one config based on the specs you enter — run it once per location with each site\'s hardware profile.</div>':'')
+    :'')
+  +'<div class="sec">Default Unit System</div><div class="og">'
+  +oc('mmns','mmNs','mm-Newton-sec','',P.units==='mmns',"sv('units','mmns')")
+  +oc('mmks','mmKs','mm-Kilogram-sec','',P.units==='mmks',"sv('units','mmks')")
+  +oc('mks','MKS','m-Kilogram-sec','',P.units==='mks',"sv('units','mks')")
+  +oc('ips','IPS','Inch-Pound-sec','',P.units==='ips',"sv('units','ips')")
+  +'</div><div class="sec">Tolerance Standard</div><div class="og">'
+  +oc('iso','ISO','International','',P.standard==='iso',"sv('standard','iso')")
+  +oc('ansi','ANSI','American','',P.standard==='ansi',"sv('standard','ansi')")+'</div>'
+}
+function sHw(el){
+  el.innerHTML='<div class="sec">RAM</div><div class="og s4">'
+  +['16gb','32gb','64gb','128gb'].map(v=>oc(v,v.toUpperCase(),'','',P.ram===v,"sv('ram','"+v+"')")).join('')
+  +'</div><div class="sec">GPU</div><div class="og s1">'
+  +oc('high','High-End GPU','RTX A5000+, Quadro RTX 5000+','🎮',P.gpu==='high',"sv('gpu','high')")
+  +oc('mid','Mid-Range GPU','RTX A2000-A4000, T1000','🖥️',P.gpu==='mid',"sv('gpu','mid')")
+  +oc('low','Basic / Integrated','Intel UHD, AMD integrated','📺',P.gpu==='low',"sv('gpu','low')")
+  +'</div><div class="sec">CPU</div><div class="og s1">'
+  +oc('high','High-End','8+ cores (Xeon W, i9, Ryzen 9)','⚡',P.cpu==='high',"sv('cpu','high')")
+  +oc('mid','Mid-Range','4-8 cores (i7, Ryzen 7)','🔧',P.cpu==='mid',"sv('cpu','mid')")
+  +oc('low','Basic','2-4 cores (i5 or lower)','💡',P.cpu==='low',"sv('cpu','low')")
+  +'</div><div class="sec">Infrastructure</div><div class="og">'
+  +oc('physical','Physical Workstation','Dedicated hardware','🖥️',P.infra==='physical',"sv('infra','physical')")
+  +oc('vdi','VDI / Virtual Desktop','Citrix, VMware Horizon','☁️',P.infra==='vdi',"sv('infra','vdi')")
+  +'</div><div class="sec">Network Connectivity</div><div class="og s1">'
+  +oc('local','On-site / LAN','Low latency, direct connection','🏢',P.network==='local',"sv('network','local')")
+  +oc('vpn','VPN / Remote','Medium latency','🌐',P.network==='vpn',"sv('network','vpn')")
+  +oc('remote','High-latency Remote','Satellite offices, offshore','📡',P.network==='remote',"sv('network','remote')")+'</div>'
+}
+function sUse(el){
+  const u=P.usage;
+  el.innerHTML='<div class="sec">Design Workflows (select all)</div><div class="og s1">'
+  +[['part_design','Part Design','3D modeling','🔩'],['small_assembly','Small/Medium Assemblies','< 500 components','🔧'],
+    ['large_assembly','Large / Master Assemblies','500+ components','🏗️'],['drawing','2D Drawing / Detailing','Drawings, BOM','📐'],
+    ['sheetmetal','Sheet Metal','Flat patterns, bending','🔨'],['simulation','Simulation','FEA, thermal, modal','📊'],
+    ['manufacturing','Manufacturing (CAM)','CNC, toolpaths','🏭'],['additive','Additive Manufacturing','3D printing','🖨️']
+  ].map(([v,l,s,i])=>cc2(v,l,s,i,u.includes(v),"tu('"+v+"')")).join('')
+  +'</div><div class="sec">Typical Assembly Size</div><div class="og s1">'
+  +oc('small','Small — Under 100 components','Simple products, sub-assemblies, hardware kits','📦',P.asmSize==='small',"sv('asmSize','small')")
+  +oc('medium','Medium — 100 to 500 components','Typical mechanical assemblies, equipment sub-systems','🔧',P.asmSize==='medium',"sv('asmSize','medium')")
+  +oc('large','Large — 500 to 5,000 components','Complete machines, vehicles, industrial equipment','🏗️',P.asmSize==='large',"sv('asmSize','large')")
+  +oc('very_large','Very Large — 5,000+ components','Aircraft, plants, heavy machinery, master assemblies','🏭',P.asmSize==='very_large',"sv('asmSize','very_large')")
+  +'</div><div class="sec">Drawing Complexity</div><div class="og s1">'
+  +oc('light','Light','Simple views, few sheets','📄',P.drawComplexity==='light',"sv('drawComplexity','light')")
+  +oc('standard','Standard','Multiple views, hidden lines, standard sheets','📑',P.drawComplexity==='standard',"sv('drawComplexity','standard')")
+  +oc('heavy','Heavy','Many sheets, large assembly drawings, slow to open','📚',P.drawComplexity==='heavy',"sv('drawComplexity','heavy')")
+  +'</div><div class="sec">Stability Concerns</div><div class="og s1">'
+  +oc('yes','Enable Crash Prevention Settings','Adds auto_traceback, regen_int_mdls_on_retr, and other options that reduce Creo crashes. Recommended when users report frequent errors or hangs.','🛡️',P.crashPrevent==='yes',"sv('crashPrevent','yes')")
+  +oc('no','Skip Crash Prevention','Use default behavior','⚡',P.crashPrevent==='no',"sv('crashPrevent','no')")
+  +'</div>'
+  +(P.isGlobal==='yes'?'<div class="sec">Multi-Region Data Sync</div><div class="og s1">'
+  +oc('yes','Enable Multi-Region Sync','For global companies with designers in multiple regions (US, EU, APAC). Disables local cache and enables background sync to keep data consistent across sites.','🌐',P.multiRegionSync==='yes',"sv('multiRegionSync','yes')")
+  +oc('no','Single-Region Mode','Use standard caching','🏢',P.multiRegionSync==='no',"sv('multiRegionSync','no')")
+  +'</div>':'')
+}
+function sSw(el){
+  el.innerHTML='<div class="sec">Creo Parametric Version</div><div class="og s3">'
+  +['8','9','10','11'].map(v=>oc(v,'Creo '+v+'.0','','',P.version===v,"sv('version','"+v+"')")).join('')
+  +'</div>'+(parseInt(P.version)<10?'<div class="tip">💡 Note: Some settings in this tool (like <code>enable_learning_connector</code>) are only available in Creo 10+. Version-incompatible settings will be excluded from the output.</div>':'')
+  +'<div class="sec">PLM System</div><div class="og s1">'
+  +oc('windchill','PTC Windchill','PDMLink integration','🌐',P.plm==='windchill',"sv('plm','windchill')")
+  +oc('other','Other PLM','Teamcenter, 3DExperience','📦',P.plm==='other',"sv('plm','other')")
+  +oc('none','None / Local Files','Local or network directories','📁',P.plm==='none',"sv('plm','none')")
+  +'</div><div class="sec">License Management</div><div class="og s1">'
+  +oc('floating','Floating License (FlexNet Server)','Centralized license server on the network','🖧',P.licType==='floating',"sv('licType','floating')")
+  +oc('nodelocked','Node-Locked','License file locked to each machine','💻',P.licType==='nodelocked',"sv('licType','nodelocked')")
+  +oc('cloud','Creo+ (Cloud License)','PTC cloud-based licensing','☁️',P.licType==='cloud',"sv('licType','cloud')")
+  +'</div>'
+  +(P.licType==='floating'?
+    '<div class="tip">💡 This generates a template <code>PTC_D_LICENSE_FILE</code> environment variable in the output .bat file. The CAD administrator should fill in the actual hostname (port@hostname format) when deploying. Default PTC port is 7788.</div>'
+    :'')
+}
+function sPerf(el){
+  el.innerHTML='<div class="sec">Default Display Style</div><div class="og s1">'
+  +oc('shading_with_edges','Shading with Edges','Most common default — shows solid model with visible edges','🎨',P.displayStyle==='shading_with_edges',"sv('displayStyle','shading_with_edges')")
+  +oc('shading','Shading Only','Solid rendering without edge lines — cleaner look','🖼️',P.displayStyle==='shading',"sv('displayStyle','shading')")
+  +oc('wireframe','Wireframe','Edges only, no shading — fastest performance for huge assemblies','📐',P.displayStyle==='wireframe',"sv('displayStyle','wireframe')")
+  +'</div><div class="sec">Anti-Aliasing (FSAA)</div>'
+  +'<div class="tip">💡 <b>What is Anti-Aliasing?</b> FSAA (Full-Scene Anti-Aliasing) is a graphics technique that smooths jagged edges on lines and curves in 3D models. <b>When ON:</b> lines look smoother and more polished, but uses significantly more GPU memory — can slow down large assembly operations. <b>When OFF:</b> edges appear pixelated/jagged, but Creo runs faster, especially on large assemblies. PTC Community recommends turning OFF for assemblies with 5,000+ components and ON only for detail work or presentations.</div>'
+  +'<div class="og" style="margin-top:10px">'
+  +oc('on','Enabled','Smoother edges, higher GPU usage — good for part design & reviews','✨',P.antiAlias==='on',"sv('antiAlias','on')")
+  +oc('off','Disabled','Faster rendering, visible pixelation — recommended for large assemblies','⚡',P.antiAlias==='off',"sv('antiAlias','off')")
+  +'</div><div class="sec">Level of Detail (LOD)</div>'
+  +'<div class="tip">💡 <b>What is LOD?</b> Level of Detail automatically simplifies geometry of distant/small components when zoomed out or spinning. Reduces GPU load dramatically on large assemblies with minimal visual impact.</div>'
+  +'<div class="og" style="margin-top:10px">'
+  +oc('yes','Enabled','Simplify distant geometry (recommended for 500+ component assemblies)','✅',P.lod==='yes',"sv('lod','yes')")
+  +oc('no','Disabled','Full detail at all zoom levels — only for small assemblies','❌',P.lod==='no',"sv('lod','no')")
+  +'</div>'
+  +'<div class="tip2">✅ <b>PTC Community tip:</b> <code>shade_quality</code> is described as "EXTREMELY DETRIMENTAL" to large assembly performance. For assemblies with 5,000+ components, use Wireframe display + LOD enabled + Anti-Aliasing OFF during retrieval, then switch to Shading with Edges only for detail work.</div>'
+}
+function sDirs(el){
+  // Pre-fill defaults based on PTC recommendations
+  if(!P.templateDir&&P.version)P.templateDir='C:\\Program Files\\PTC\\Creo '+P.version+'.0.0.0\\Common Files\\templates';
+  if(!P.materialDir&&P.version)P.materialDir='C:\\Program Files\\PTC\\Creo '+P.version+'.0.0.0\\Common Files\\materials';
+  if(!P.formatDir)P.formatDir='';
+  el.innerHTML='<div class="sec">Standard Directories</div>'
+  +inp('workDir','Working Directory','Default working folder',P.workDir,'Where Creo saves files by default. Use %username% for user-specific paths.')
+  +inp('searchPath','Search Path(s)','Separate with semicolons (;)',P.searchPath,'e.g. \\\\server\\creo\\library ; \\\\server\\creo\\standards')
+  +inp('templateDir','Start Parts / Templates','Template directory path',P.templateDir,'PTC default: Creo install path\\Common Files\\templates')
+  +inp('materialDir','Materials Library','Material library path',P.materialDir,'PTC default: Creo install path\\Common Files\\materials')
+  +inp('formatDir','Drawing Formats','Format files directory',P.formatDir,'e.g. \\\\server\\creo\\formats')
+  +'<div class="sec">Migration from Another CAD System</div><div class="og s1">'
+  +oc('none','No Migration','Fresh Creo deployment','',P.migrationFrom==='none',"sv('migrationFrom','none')")
+  +oc('solidworks','Migrating from SolidWorks','Import SW settings/preferences','',P.migrationFrom==='solidworks',"sv('migrationFrom','solidworks')")
+  +oc('nx','Migrating from Siemens NX','Import NX configuration','',P.migrationFrom==='nx',"sv('migrationFrom','nx')")+'</div>'
+  +(P.migrationFrom!=='none'?
+    '<div class="ig"><label>Paste your '+P.migrationFrom.toUpperCase()+' settings / preferences below</label>'
+    +'<textarea id="migCfg" placeholder="Paste your current CAD configuration or settings export here...\n\nFor SolidWorks: Go to Tools > Options > Export settings\nFor NX: Export your customer_defaults.xml or ugii_env.dat content" oninput="P.migrationConfig=this.value">'+esc(P.migrationConfig)+'</textarea>'
+    +'<div class="ht">The generator will add migration notes to your config.pro based on the settings you paste here.</div></div>'
+    +'<div class="tip2">✅ Migration tip: The generated config.pro will include your Creo-optimized settings. '
+    +(P.migrationFrom==='solidworks'?'SolidWorks users typically need: tolerance_standard (ANSI→ISO), units, auto-save behavior, and display quality adjustments. Feature creation workflow differs significantly — consider PTC University training.':'NX users typically need: unit system, tolerance, layer/display configuration, and drafting standard adjustments. Many NX concepts map directly to Creo.')
+    +'</div>':'')
+}
+function sRes(el){
+  const{content,settings}=gen();window._cc=content;window._ev=genEnv();
+  const cc2={};settings.forEach(s=>{cc2[s.cat]=(cc2[s.cat]||0)+1});
+  el.innerHTML='<div class="sg">'
+  +`<div class="sb2" style="background:var(--acd)"><div class="nm" style="color:var(--ac)">${settings.length}</div><div class="la">Settings</div></div>`
+  +`<div class="sb2" style="background:var(--okd)"><div class="nm" style="color:var(--ok)">${Object.keys(cc2).length}</div><div class="la">Categories</div></div>`
+  +`<div class="sb2" style="background:var(--wnd)"><div class="nm" style="color:var(--wn)">v${P.version}</div><div class="la">Creo</div></div></div>`
+
+  // Tabs
+  +'<div class="tabs"><div class="tab '+(resTab==='config'?'active':'')+'" onclick="resTab=\'config\';render()">📄 config.pro</div>'
+  +'<div class="tab '+(resTab==='env'?'active':'')+'" onclick="resTab=\'env\';render()">🖥️ Windows Env Variables</div>'
+  +'<div class="tab '+(resTab==='notes'?'active':'')+'" onclick="resTab=\'notes\';render()">📋 Deployment Notes</div></div>'
+
+  +(resTab==='config'?
+    '<div style="display:flex;gap:8px;margin-bottom:14px"><button class="btn bd" onclick="dl(\'config\')">⬇ Download config.pro</button>'
+    +'<button class="btn bc" id="cpb" onclick="cp(\'config\')">📋 Copy</button></div>'
+    +'<div class="sec">Settings by Category</div><div class="tw">'
+    +Object.entries(cc2).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<span class="tg">${c} (${n})</span>`).join('')+'</div>'
+    +'<div class="cp2">'+content.split('\n').map((l,i)=>{let h='';
+      if(l.startsWith('!')){h=`<span style="color:#4a5568">${esc(l)}</span>`}
+      else if(l.includes(' ')&&l.trim()){const p=l.split(' ');h=`<span style="color:#7eb8f7">${esc(p[0])}</span> <span style="color:#a5d6ff">${esc(p.slice(1).join(' '))}</span>`}
+      else h=esc(l);return`<div class="cl"><span class="ln">${i+1}</span>${h}</div>`}).join('')+'</div>'
+  :resTab==='env'?
+    '<div style="display:flex;gap:8px;margin-bottom:14px"><button class="btn bd" onclick="dl(\'env\')">⬇ Download .bat</button>'
+    +'<button class="btn bc" id="cpb" onclick="cp(\'env\')">📋 Copy</button></div>'
+    +'<div class="sec">Windows Environment Variables & System Settings</div>'
+    +'<div class="cp2">'+window._ev.split('\n').map((l,i)=>{let h='';
+      if(l.startsWith('REM'))h=`<span style="color:#4a5568">${esc(l)}</span>`;
+      else if(l.startsWith('setx'))h=`<span style="color:#00d68f">${esc(l)}</span>`;
+      else h=`<span style="color:#a5d6ff">${esc(l)}</span>`;
+      return`<div class="cl"><span class="ln">${i+1}</span>${h}</div>`}).join('')+'</div>'
+  :// Deployment Notes
+    '<div class="sec">Deployment Checklist</div><div style="font-size:12px;line-height:2;color:var(--tx)">'
+    +'<b>1.</b> Place <code>config.pro</code> in the Creo start-in directory<br>'
+    +'<b>2.</b> Run the environment variables .bat file as Administrator<br>'
+    +'<b>3.</b> Verify GPU driver is PTC-certified for Creo '+P.version+'.0<br>'
+    +(P.plm==='windchill'?'<b>4.</b> Register Windchill server in Creo after first launch<br>':'')
+    +(parseInt(P.version)>=9?'<b>'+(P.plm==='windchill'?'5':'4')+'.</b> For shared configs, set <code>PTC_CREO_ALT_SETTINGS_PATH</code> env variable (Creo 9+)<br>':'')
+    +(P.isGlobal==='yes'?'<b>⚠️</b> Multi-site: Generate separate config.pro per location if hardware differs<br>':'')
+    +(P.infra==='vdi'?'<b>⚠️</b> VDI: Verify <code>PRO_MACHINE_TYPE=x86e_win64</code> and <code>enable_opengl_fbo no</code><br>':'')
+    +'</div>'
+    +'<div class="sec">Config.pro Load Order (PTC Documentation)</div><div style="font-size:11px;line-height:1.8;color:var(--txd)">'
+    +'1. <code>&lt;Creo_install&gt;\\text\\config.pro</code> — Installation defaults<br>'
+    +'2. <code>%USERPROFILE%\\config.pro</code> — User home directory<br>'
+    +'3. <code>&lt;Start-In directory&gt;\\config.pro</code> — Shortcut start-in folder<br>'
+    +'4. <code>config.sup</code> — Admin-locked settings (cannot be overridden)<br>'
+    +'<br>Later files override earlier ones. <code>config.sup</code> always wins.</div>'
+  )
+
+  +'<div class="wb">⚠️ Review all settings against your specific environment. Validate with PTC documentation for Creo '+P.version+'.0. For global deployments, test at one site before rolling out.</div>'
+}
+
+// ═══ ACTIONS ═══
+function sv(k,v){P[k]=v;render()}
+function tu(v){const i=P.usage.indexOf(v);if(i>=0)P.usage.splice(i,1);else P.usage.push(v);render()}
+function next(){if(step<ST.length-1){step++;render();scrollTo(0,0)}}
+function prev(){if(step>0){step--;render();scrollTo(0,0)}}
+function go(i){step=i;render();scrollTo(0,0)}
+function dl(type){
+  const c=type==='env'?window._ev:window._cc;
+  const fn=type==='env'?'creo_env_setup.bat':'config.pro';
+  const b=new Blob([c],{type:'text/plain'});const u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u)}
+function cp(type){
+  const t=type==='env'?window._ev:window._cc;
+  navigator.clipboard.writeText(t).then(cpOk).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);cpOk()})}
+function cpOk(){const b=document.getElementById('cpb');b.className='btn bc cp';b.textContent='✓ Copied!';setTimeout(()=>{b.className='btn bc';b.textContent='📋 Copy'},2000)}
+
+render();
+</script>
+</body>
+</html>
