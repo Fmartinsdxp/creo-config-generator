@@ -72,7 +72,7 @@
 </style>
 </head>
 <body>
-<div class="hdr"><div class="hi"><div class="logo">C</div><div><h1>Creo Config.pro Generator</h1><p>Generate optimized configurations based on your environment — Built on PTC Community best practices</p></div></div></div>
+<div class="hdr"><div class="hi"><div class="logo">C</div><div><h1>Creo Config.pro Generator</h1><p>Generate optimized configurations based on your environment — Built on PTC Community best practices</p></div><div style="margin-left:auto;flex-shrink:0"><button class="btn" style="padding:7px 14px;font-size:11px;background:rgba(255,255,255,.08);color:var(--txd);border:1px solid var(--bd);border-radius:8px" onclick="showHelp()">❓ Help</button></div></div></div>
 <div class="pb"><div class="pi" id="pb"></div></div>
 <div class="ct"><div class="sh" id="sh"></div><div class="card fi" id="sc"></div><div id="na"></div></div>
 <div class="ft">Creo Config.pro Generator v3.0 &bull; PTC Community best practices &bull; 2082+ settings database</div>
@@ -280,7 +280,7 @@ const R=[
 {n:'fonts_size',v:'small',c:{any:true},cat:'User Interface',d:'Small fonts (more screen space)'},
 {n:'menu_activate_on_press',v:'yes',c:{any:true},cat:'User Interface',d:'Menu activates on press'},
 {n:'web_enable_javascript',v:'off',c:{any:true},cat:'User Interface',d:'Disable JS in embedded browser (security)'},
-{n:'windows_browser_type',v:'chromium_browser',c:{version:['8','9','10','11']},cat:'User Interface',d:'Chromium browser (Creo 7+)'},
+{n:'windows_browser_type',v:'chromium_browser',c:{version:['8','9','10','11','12']},cat:'User Interface',d:'Chromium browser (Creo 7+)'},
 
 // ═══ FILE STORAGE REFINEMENTS (client config) ═══
 {n:'disable_search_path_check',v:'yes',c:{multiRegionSync:['yes']},cat:'File Storage',d:'Disable search path check (speeds retrieval)'},
@@ -297,7 +297,7 @@ const R=[
 {n:'graphics',v:'opengl',c:{any:true},cat:'System',d:'OpenGL graphics (recommended by PTC)'},
 
 // VERSION SPECIFIC (Creo 10+)
-{n:'enable_learning_connector',v:'yes',c:{version:['10','11']},cat:'Environment',d:'Learning Connector (10+)'},
+{n:'enable_learning_connector',v:'yes',c:{version:['10','11','12']},cat:'Environment',d:'Learning Connector (10+)'},
 {n:'enable_learning_connector',v:'no',c:{version:['8','9']},cat:'Environment',d:'Learning Connector OFF'},
 ];
 
@@ -390,6 +390,7 @@ function genEnv(){
 
 // ═══ RENDER ═══
 function render(){
+  if(showHelpScreen){renderHelpScreen();return}
   if(showIntro){renderIntro();return}
   if(showAnalyzer){renderAnalyzer();return}
   document.getElementById('pb').style.display='';
@@ -412,6 +413,83 @@ function renderAnalyzer(){
   document.getElementById('na').innerHTML=`<button class="btn br" onclick="backToIntro()">← Back to main menu</button>`;
 }
 function backToIntro(){showIntro=true;showAnalyzer=false;analyzerResult=null;render();scrollTo(0,0)}
+
+let showHelpScreen=false;
+function showHelp(){showHelpScreen=true;renderHelpScreen();scrollTo(0,0)}
+function closeHelp(){showHelpScreen=false;render();scrollTo(0,0)}
+
+function renderHelpScreen(){
+  document.getElementById('pb').style.display='none';
+  document.getElementById('sh').innerHTML=`<h2><span>❓</span> User Guide</h2><p>How to use the Creo Config.pro Generator tool</p>`;
+  document.getElementById('na').innerHTML=`<button class="btn br" onclick="closeHelp()">← Back to Tool</button>`;
+  const e=document.getElementById('sc');
+  e.className='card fi';
+  e.innerHTML=`
+  <div class="sec">🎯 Overview</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:16px">
+    This tool helps CAD Administrators generate optimized <b>config.pro</b> files for PTC Creo Parametric. It has two main modes: <b>Generate New</b> (create from scratch using a step-by-step wizard) and <b>Analyze Existing</b> (upload a current config.pro for automated review).
+  </div>
+
+  <div class="sec">⚙️ Mode 1: Generate New config.pro</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:8px">The wizard guides you through 7 steps:</div>
+  <div style="display:grid;gap:6px;margin-bottom:16px">
+    ${[
+      ['1. Company & Standards','Enter company info, choose unit system (mmNs/IPS/MKS) and tolerance standard (ISO/ANSI). For global companies, specify how many locations you have.'],
+      ['2. Hardware & Network','Select your RAM, GPU, and CPU tier. Specify if you use physical workstations or VDI (virtual desktops), and your network type (LAN, VPN, or remote).'],
+      ['3. Design Workflows','Check all workflows your team uses (Part Design, Large Assemblies, Drawing, Simulation, etc.). Select your typical assembly size and drawing complexity. Enable crash prevention and multi-region sync if needed.'],
+      ['4. Software & Licensing','Choose your Creo version (8 through 12+), PLM system (Windchill/Other/None), and licensing type (Floating/Node-Locked/Cloud).'],
+      ['5. Performance Tuning','Set default display style, anti-aliasing, and Level of Detail preferences. Each option includes descriptions to help you choose.'],
+      ['6. Directories & Migration','Configure working directory, search paths, templates, and materials directories (pre-filled with PTC defaults). Optionally indicate if you are migrating from SolidWorks or NX.'],
+      ['7. Generated Output','Review and download your config.pro file. Also generates a Windows environment variables .bat script and a deployment checklist.']
+    ].map(([t,d])=>`<div style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px">
+      <div style="font-weight:600;color:var(--txb);font-size:12px">${t}</div>
+      <div style="font-size:11px;color:var(--txd);line-height:1.5;margin-top:3px">${d}</div>
+    </div>`).join('')}
+  </div>
+
+  <div class="sec">🔍 Mode 2: Analyze Existing config.pro</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:8px">Upload your current config.pro file for an automated review. The analyzer will:</div>
+  <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:16px;font-size:11px;line-height:1.8">
+    <div>🔴 <b>Detect typos</b> — Settings with misspelled names that Creo silently ignores</div>
+    <div>⚠️ <b>Flag obsolete settings</b> — Options that hurt performance or are deprecated</div>
+    <div>🔧 <b>Identify suboptimal values</b> — Settings that differ from PTC recommendations</div>
+    <div>➕ <b>Suggest missing settings</b> — Best practices not yet in your config</div>
+    <div>✅ <b>Confirm optimal settings</b> — Settings that already follow recommendations</div>
+  </div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:16px">
+    After the analysis, you have three options:<br>
+    <b>✨ Generate Optimized config.pro</b> — Automatically fixes typos, removes obsolete settings, applies recommended values, and adds missing recommendations while preserving your custom settings.<br>
+    <b>⚙️ Continue to Wizard</b> — Pre-fills the wizard with settings detected from your file, so you can review and customize each section step by step.<br>
+    <b>⬇ Download Report</b> — Get a text-format audit report for documentation.
+  </div>
+
+  <div class="sec">📋 Output Files</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:16px">
+    The tool generates three outputs:<br>
+    <b>config.pro</b> — The configuration file to deploy to Creo users.<br>
+    <b>creo_env_setup.bat</b> — Windows batch script to set environment variables (license server, VDI fixes, virtual memory, etc.).<br>
+    <b>Deployment Notes</b> — A checklist and the config.pro load order hierarchy.
+  </div>
+
+  <div class="sec">🔒 Privacy & Security</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx);margin-bottom:16px">
+    <b>All processing is done 100% in your browser.</b> No data is uploaded to any server. Your config.pro file and company information never leave your machine. This tool is a static HTML file with no backend, no cookies, no tracking, and no external API calls.
+  </div>
+
+  <div class="sec">📚 Reference Links</div>
+  <div style="font-size:12px;line-height:1.7;margin-bottom:16px">
+    <div style="margin-bottom:6px"><a href="https://support.ptc.com/help/creo/creo_pma/r12/usascii/configuration_options/About_Configuration_Files.html" target="_blank" style="color:var(--ac);text-decoration:none">📖 PTC Help: About Configuration Files</a></div>
+    <div style="margin-bottom:6px"><a href="https://www.ptc.com/en/success-paths/get-started-creo-parametric/setup/configure-customize" target="_blank" style="color:var(--ac);text-decoration:none">📖 PTC Success Path: Configure & Customize Creo</a></div>
+    <div style="margin-bottom:6px"><a href="https://community.ptc.com/creo-parametric-tips-390" target="_blank" style="color:var(--ac);text-decoration:none">📖 PTC Community: Creo Parametric Tips</a></div>
+    <div><a href="https://community.ptc.com/system-administration-175" target="_blank" style="color:var(--ac);text-decoration:none">📖 PTC Community: System Administration</a></div>
+  </div>
+
+  <div class="sec">ℹ️ About</div>
+  <div style="font-size:12px;line-height:1.7;color:var(--tx)">
+    <b>Creo Config.pro Generator</b> — Built on PTC Community best practices, PTC documentation, and real-world customer configurations. Contains 158+ rules covering Model Display, Assembly, Drawing, Simulation, Data Management, Crash Prevention, Multi-Region Sync, and more. Settings database is based on PTC's official config.pro options list (2,082+ settings) for Creo Parametric 8 through 12+.
+  </div>
+  `;
+}
 function sIntro(){
   return `<div style="text-align:center;margin-bottom:24px">
     <div style="font-size:48px;margin-bottom:8px">⚙️</div>
@@ -801,7 +879,18 @@ function sAnalyzerReport(){
     <button class="btn bb" onclick="downloadReport()">⬇ Download Report (.txt)</button>
     <button class="btn br" onclick="resetAnalyzer()">🔄 Analyze Another File</button>
   </div>
-  <div class="tip" style="margin-top:14px">💡 <b>Safe approach:</b> The optimized file preserves your custom/site-specific settings (like directory paths and company-specific configurations) and only modifies what the analyzer flagged as problematic or missing.</div>`;
+
+  <div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:16px;margin-top:14px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:22px">🧙</span>
+      <div>
+        <div style="font-weight:700;color:var(--txb);font-size:13px">Want More Control? Continue to the Full Wizard</div>
+        <div style="font-size:11px;color:var(--tx);line-height:1.5;margin-top:2px">Use the step-by-step wizard to build a config.pro from scratch — specifying your hardware, workflows, PLM, directories, and performance preferences in detail. Ideal when you want to fully customize beyond what the automatic optimizer provides.</div>
+      </div>
+    </div>
+    <button class="btn" style="width:100%;padding:11px;background:var(--bg4);color:var(--txb);border:1.5px solid var(--bd);font-weight:600" onclick="continueToWizard()">⚙️ Continue to Configuration Wizard →</button>
+  </div>
+  <div class="tip" style="margin-top:10px">💡 <b>Safe approach:</b> The optimized file preserves your custom/site-specific settings (like directory paths and company-specific configurations) and only modifies what the analyzer flagged.</div>`;
 
   return html;
 }
@@ -1040,6 +1129,54 @@ function copyOptimized(){
 
 function resetAnalyzer(){analyzerResult=null;render();scrollTo(0,0)}
 
+function continueToWizard(){
+  // Pre-fill wizard profile from analyzed config
+  if(analyzerResult && analyzerResult.rawCurrent){
+    const c = analyzerResult.rawCurrent;
+    // Units
+    if(c.pro_unit_sys) P.units = c.pro_unit_sys.value.toLowerCase();
+    else if(c.pro_unit_length){
+      const ul = c.pro_unit_length.value.toLowerCase();
+      if(ul.includes('mm')) P.units = 'mmns';
+      else if(ul.includes('inch')) P.units = 'ips';
+      else if(ul.includes('m')) P.units = 'mks';
+    }
+    // Standard
+    if(c.tolerance_standard) P.standard = c.tolerance_standard.value.toLowerCase();
+    // Display
+    if(c.display){
+      const d = c.display.value.toLowerCase();
+      if(d.includes('shade') && d.includes('edge')) P.displayStyle = 'shading_with_edges';
+      else if(d.includes('shade')) P.displayStyle = 'shading';
+      else if(d.includes('wire')) P.displayStyle = 'wireframe';
+    }
+    // Anti-alias
+    if(c.enable_fsaa) P.antiAlias = c.enable_fsaa.value.toLowerCase()==='yes'||c.enable_fsaa.value.toLowerCase()==='on'?'on':'off';
+    // PLM
+    if(c.dm_remember_server || c.dm_cache_limit || c.dm_network_threads) P.plm = 'windchill';
+    // Directories
+    if(c.working_directory) P.workDir = c.working_directory.value;
+    if(c.template_solidpart) P.templateDir = c.template_solidpart.value.replace(/\\[^\\]+$/, '');
+    if(c.pro_material_dir) P.materialDir = c.pro_material_dir.value;
+    if(c.pro_format_dir) P.formatDir = c.pro_format_dir.value;
+    // Assembly hints
+    if(c.simprep_default_model_status){
+      const v = c.simprep_default_model_status.value.toLowerCase();
+      if(v === 'geometry' || v === 'exclude') P.asmSize = 'large';
+    }
+    // Crash prevention
+    if(c.auto_traceback) P.crashPrevent = 'yes';
+    // Multi-region
+    if(c.dm_synchronize_in_background) P.multiRegionSync = 'yes';
+  }
+  showIntro = false;
+  showAnalyzer = false;
+  analyzerResult = null;
+  step = 0;
+  render();
+  scrollTo(0, 0);
+}
+
 function downloadReport(){
   const r = analyzerResult;
   const lines = [];
@@ -1211,8 +1348,8 @@ function sUse(el){
 }
 function sSw(el){
   el.innerHTML='<div class="sec">Creo Parametric Version</div><div class="og s3">'
-  +['8','9','10','11'].map(v=>oc(v,'Creo '+v+'.0','','',P.version===v,"sv('version','"+v+"')")).join('')
-  +'</div>'+(parseInt(P.version)<10?'<div class="tip">💡 Note: Some settings in this tool (like <code>enable_learning_connector</code>) are only available in Creo 10+. Version-incompatible settings will be excluded from the output.</div>':'')
+  +['8','9','10','11','12'].map(v=>oc(v,v==='12'?'Creo+ 12.0 (Cloud)':'Creo '+v+'.0','','',P.version===v,"sv('version','"+v+"')")).join('')
+  +'</div>'+(parseInt(P.version)<10?'<div class="tip">💡 Note: Some settings (like <code>enable_learning_connector</code>) are only available in Creo 10+. Version-incompatible settings will be excluded from the output.</div>':'')+(P.version==='12'?'<div class="tip2">✅ <b>Creo+ 12.0 (Cloud)</b> — This is PTC\'s cloud-native version with SaaS licensing. License management is handled through PTC account — no FlexNet server needed. Config.pro settings still apply but some cloud-specific defaults may override local settings.</div>':'')
   +'<div class="sec">PLM System</div><div class="og s1">'
   +oc('windchill','PTC Windchill','PDMLink integration','🌐',P.plm==='windchill',"sv('plm','windchill')")
   +oc('other','Other PLM','Teamcenter, 3DExperience','📦',P.plm==='other',"sv('plm','other')")
