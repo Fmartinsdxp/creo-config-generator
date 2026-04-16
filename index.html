@@ -87,7 +87,7 @@ const ST=[
 {id:'dirs',t:'Directories & Migration',st:'File paths, search paths, CAD migration',ic:'📁'},
 {id:'res',t:'Generated Output',st:'config.pro + Windows environment variables',ic:'📄'}
 ];
-let step=0,resTab='config',showIntro=true;
+let step=0,resTab='config',showIntro=true,showAnalyzer=false,analyzerResult=null;
 let P={company:'',location:'',users:'',isGlobal:'no',numLocations:'1',sameInfra:'yes',
 units:'mmns',standard:'iso',
 ram:'32gb',gpu:'mid',cpu:'mid',infra:'physical',network:'local',
@@ -391,6 +391,7 @@ function genEnv(){
 // ═══ RENDER ═══
 function render(){
   if(showIntro){renderIntro();return}
+  if(showAnalyzer){renderAnalyzer();return}
   document.getElementById('pb').style.display='';
   rP();rH();rC();rN()
 }
@@ -402,6 +403,15 @@ function renderIntro(){
   e.className='card fi';
   e.innerHTML=sIntro();
 }
+function renderAnalyzer(){
+  document.getElementById('pb').style.display='none';
+  document.getElementById('sh').innerHTML=`<h2><span>🔍</span> Analyze Existing config.pro</h2><p>Upload your current config.pro file for an automated review against PTC recommendations</p>`;
+  const e=document.getElementById('sc');
+  e.className='card fi';
+  e.innerHTML=analyzerResult?sAnalyzerReport():sAnalyzerUpload();
+  document.getElementById('na').innerHTML=`<button class="btn br" onclick="backToIntro()">← Back to main menu</button>`;
+}
+function backToIntro(){showIntro=true;showAnalyzer=false;analyzerResult=null;render();scrollTo(0,0)}
 function sIntro(){
   return `<div style="text-align:center;margin-bottom:24px">
     <div style="font-size:48px;margin-bottom:8px">⚙️</div>
@@ -458,11 +468,416 @@ function sIntro(){
 
   <div class="tip2" style="margin-top:10px">✅ <b>This tool helps you:</b> Generate a config.pro tailored to your specific environment (hardware, workflows, PLM, global locations) based on PTC-recommended settings and real-world community best practices — giving your CAD Admin a solid starting point instead of a blank file with 2,000+ options.</div>
 
-  <div style="margin-top:24px;text-align:center">
-    <button class="btn bn" style="padding:14px 36px;font-size:14px" onclick="startWizard()">Start Configuration Wizard →</button>
+  <div class="sec" style="margin-top:28px">🚀 Choose an Option</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+    <div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s" onclick="startWizard()" onmouseover="this.style.borderColor='var(--ac)';this.style.background='var(--acd)'" onmouseout="this.style.borderColor='var(--bd)';this.style.background='var(--bg3)'">
+      <div style="font-size:28px;margin-bottom:6px">⚙️</div>
+      <div style="font-weight:700;color:var(--txb);font-size:14px;margin-bottom:4px">Generate New config.pro</div>
+      <div style="font-size:11px;color:var(--txd);line-height:1.5;margin-bottom:12px">Start from scratch. Answer questions about your environment and get a tailored config.pro file.</div>
+      <button class="btn bn" style="width:100%;padding:10px">Start Wizard →</button>
+    </div>
+    <div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s" onclick="startAnalyzer()" onmouseover="this.style.borderColor='var(--ok)';this.style.background='var(--okd)'" onmouseout="this.style.borderColor='var(--bd)';this.style.background='var(--bg3)'">
+      <div style="font-size:28px;margin-bottom:6px">🔍</div>
+      <div style="font-weight:700;color:var(--txb);font-size:14px;margin-bottom:4px">Analyze Existing config.pro</div>
+      <div style="font-size:11px;color:var(--txd);line-height:1.5;margin-bottom:12px">Upload your current config.pro and get a report of improvements based on PTC recommendations.</div>
+      <button class="btn" style="width:100%;padding:10px;background:linear-gradient(135deg,var(--ok),#00a871);color:#fff">Analyze File →</button>
+    </div>
   </div>`
 }
-function startWizard(){showIntro=false;step=0;render();scrollTo(0,0)}
+function startWizard(){showIntro=false;showAnalyzer=false;step=0;render();scrollTo(0,0)}
+function startAnalyzer(){showIntro=false;showAnalyzer=true;render();scrollTo(0,0)}
+
+// ═══ ANALYZER: UPLOAD SCREEN ═══
+function sAnalyzerUpload(){
+  return `<div style="text-align:center;margin-bottom:20px">
+    <div style="font-size:40px;margin-bottom:8px">📤</div>
+    <h3 style="font-size:16px;font-weight:700;color:var(--txb);margin-bottom:6px">Upload Your config.pro File</h3>
+    <p style="color:var(--txd);font-size:12px;line-height:1.6;max-width:480px;margin:0 auto">We'll parse your current configuration and compare it against PTC's recommended settings, flagging obsolete options, missing best practices, and potential improvements.</p>
+  </div>
+
+  <div class="drop" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="handleDrop(event)">
+    <div class="ic2">📁</div>
+    <div class="lb2">Click to browse or drag your config.pro here</div>
+    <div class="sb2a">Accepts .pro, .txt or any text file</div>
+  </div>
+  <input type="file" id="fileInput" style="display:none" accept=".pro,.txt,.sup,*" onchange="handleFileUpload(event)">
+
+  <div class="sec" style="margin-top:22px">Or Paste Your config.pro Content</div>
+  <div class="ig"><textarea id="pastedConfig" placeholder="Paste the contents of your config.pro file here..." style="min-height:140px"></textarea></div>
+  <button class="btn bn" style="width:100%;padding:12px" onclick="analyzePasted()">🔍 Analyze Configuration</button>
+
+  <div class="tip" style="margin-top:14px">💡 <b>Privacy note:</b> Your config.pro is processed entirely in your browser — nothing is uploaded to any server. The file never leaves your machine.</div>
+  <div class="tip2" style="margin-top:10px">✅ <b>What you'll get:</b> A categorized report showing (1) obsolete settings to remove, (2) recommended settings that are missing, (3) settings with values that could be optimized, (4) potential conflicts, and (5) statistics on your current configuration.</div>`
+}
+
+function handleFileUpload(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('pastedConfig').value = e.target.result;
+    analyzePasted();
+  };
+  reader.readAsText(file);
+}
+function handleDrop(ev){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('over');
+  const file = ev.dataTransfer.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('pastedConfig').value = e.target.result;
+    analyzePasted();
+  };
+  reader.readAsText(file);
+}
+function analyzePasted(){
+  const text = document.getElementById('pastedConfig').value;
+  if(!text||text.trim().length<10){alert('Please paste or upload a config.pro file first.');return}
+  analyzerResult = analyzeConfig(text);
+  render();
+  scrollTo(0,0);
+}
+
+// ═══ ANALYZER: PARSE & ANALYZE ═══
+function parseConfig(text){
+  const settings = {};
+  const lines = text.split('\n');
+  lines.forEach((raw, i) => {
+    const line = raw.trim();
+    if(!line || line.startsWith('!') || line.startsWith('#') || line.startsWith('//')) return;
+    const parts = line.split(/\s+/);
+    if(parts.length < 1) return;
+    const name = parts[0].toLowerCase();
+    const value = parts.slice(1).join(' ').trim();
+    // Skip invalid lines (malformed names)
+    if(!/^[a-z_][a-z0-9_]*$/.test(name)) return;
+    settings[name] = { value, lineNum: i+1, original: raw.trim() };
+  });
+  return settings;
+}
+
+function analyzeConfig(text){
+  const current = parseConfig(text);
+  const currentKeys = Object.keys(current);
+  
+  // Build list of all known setting names from rules
+  const knownSettings = {};
+  R.forEach(r => {
+    if(!knownSettings[r.n]) knownSettings[r.n] = [];
+    knownSettings[r.n].push(r);
+  });
+
+  // 1. OBSOLETE / DEPRECATED settings (known deprecated list)
+  const deprecated = {
+    'pro_mf_cl_dir': 'Renamed in newer Creo versions',
+    'graphics': { check: v => v && v.toLowerCase() === 'win32_gdi', msg: 'win32_gdi is for low-end graphics only; use OPENGL for modern GPUs' },
+    'smooth_lines': { check: v => v && v.toLowerCase() === 'yes', msg: 'PTC community: can cause performance issues, recommend "no"' },
+    'enable_fsaa': { check: v => v && v.toLowerCase() === 'yes', msg: 'Anti-aliasing ON can hurt large assembly performance; consider turning OFF' },
+    'shade_quality': { check: v => v && parseInt(v) > 3, msg: 'Values above 3 are "EXTREMELY DETRIMENTAL" for large assemblies per PTC community' },
+  };
+
+  // Typos detection - common misspellings
+  const typos = {
+    'llow_freeze_failed_assy_comp': 'allow_freeze_failed_assy_comp',
+    'regen_int_mdls_on_ret': 'regen_int_mdls_on_retr',
+    'display_silhoutte_edges': 'display_silhouette_edges',
+  };
+
+  const report = {
+    totalSettings: currentKeys.length,
+    matchedRecommended: [],
+    missingRecommended: [],
+    suboptimal: [],
+    obsolete: [],
+    typos: [],
+    unknown: [],
+    categories: {},
+    rawCurrent: current
+  };
+
+  // Check each current setting
+  currentKeys.forEach(key => {
+    const s = current[key];
+    
+    // Check for typos
+    if(typos[key]){
+      report.typos.push({
+        name: key,
+        value: s.value,
+        suggestion: typos[key],
+        lineNum: s.lineNum
+      });
+      return;
+    }
+
+    // Check deprecated/obsolete
+    if(deprecated[key]){
+      const dep = deprecated[key];
+      if(typeof dep === 'string'){
+        report.obsolete.push({name: key, value: s.value, reason: dep, lineNum: s.lineNum});
+      } else if(dep.check && dep.check(s.value)){
+        report.obsolete.push({name: key, value: s.value, reason: dep.msg, lineNum: s.lineNum});
+      }
+    }
+
+    // Check against known recommendations
+    if(knownSettings[key]){
+      const rules = knownSettings[key];
+      // Find if current value matches any recommended value
+      const matches = rules.filter(r => r.v.toLowerCase() === s.value.toLowerCase());
+      if(matches.length > 0){
+        report.matchedRecommended.push({name: key, value: s.value, rule: matches[0]});
+      } else {
+        // Value differs from recommendations
+        const recommendedValues = [...new Set(rules.map(r => r.v))];
+        report.suboptimal.push({
+          name: key,
+          currentValue: s.value,
+          recommendedValues: recommendedValues,
+          category: rules[0].cat,
+          description: rules[0].d,
+          lineNum: s.lineNum
+        });
+      }
+      // Track category
+      report.categories[rules[0].cat] = (report.categories[rules[0].cat]||0) + 1;
+    } else {
+      report.unknown.push({name: key, value: s.value, lineNum: s.lineNum});
+    }
+  });
+
+  // Find missing recommended settings (high-priority only: those with any:true or common conditions)
+  const currentSet = new Set(currentKeys);
+  const importantMissing = new Set();
+  R.forEach(r => {
+    if(currentSet.has(r.n)) return;
+    // Only flag universal recommendations and critical ones
+    if(r.c.any || r.cat === 'Crash Prevention' || r.cat === 'Environment' || r.cat === 'Mass Properties'){
+      if(!importantMissing.has(r.n)){
+        importantMissing.add(r.n);
+        report.missingRecommended.push({
+          name: r.n,
+          recommendedValue: r.v,
+          category: r.cat,
+          description: r.d
+        });
+      }
+    }
+  });
+
+  // Calculate health score (0-100)
+  const total = report.totalSettings || 1;
+  const issues = report.obsolete.length + report.suboptimal.length + report.typos.length;
+  const matches = report.matchedRecommended.length;
+  const missingPenalty = Math.min(report.missingRecommended.length * 0.5, 20);
+  const issuesPenalty = issues * 2;
+  const matchBonus = matches * 1.5;
+  report.healthScore = Math.max(0, Math.min(100, Math.round(70 - issuesPenalty - missingPenalty + matchBonus)));
+
+  return report;
+}
+
+// ═══ ANALYZER: REPORT SCREEN ═══
+function sAnalyzerReport(){
+  const r = analyzerResult;
+  const scoreColor = r.healthScore >= 75 ? 'var(--ok)' : r.healthScore >= 50 ? 'var(--wn)' : 'var(--er)';
+  const scoreBg = r.healthScore >= 75 ? 'var(--okd)' : r.healthScore >= 50 ? 'var(--wnd)' : 'rgba(255,71,87,.1)';
+  const scoreLabel = r.healthScore >= 75 ? 'Good' : r.healthScore >= 50 ? 'Needs Work' : 'Critical';
+
+  let html = `<div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:18px">
+    <div style="background:${scoreBg};border:1px solid ${scoreColor};border-radius:12px;padding:18px;text-align:center">
+      <div style="font-family:var(--mono);font-size:42px;font-weight:700;color:${scoreColor};line-height:1">${r.healthScore}</div>
+      <div style="font-size:10px;color:var(--txd);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Health Score</div>
+      <div style="font-size:11px;color:${scoreColor};margin-top:6px;font-weight:600">${scoreLabel}</div>
+    </div>
+    <div>
+      <div style="font-size:12px;color:var(--tx);line-height:1.7">
+        <div style="margin-bottom:4px"><b style="color:var(--txb)">${r.totalSettings}</b> settings in your config.pro</div>
+        <div style="color:var(--ok)"><b>${r.matchedRecommended.length}</b> align with PTC recommendations</div>
+        <div style="color:var(--wn)"><b>${r.suboptimal.length}</b> could be optimized</div>
+        <div style="color:var(--er)"><b>${r.obsolete.length + r.typos.length}</b> issues requiring action</div>
+        <div style="color:var(--txd)"><b>${r.missingRecommended.length}</b> recommended settings missing</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Typos (critical - broken settings)
+  if(r.typos.length > 0){
+    html += `<div class="sec" style="color:var(--er)">🔴 Critical: Typos / Broken Setting Names</div>
+      <div style="font-size:11px;color:var(--tx);line-height:1.6;margin-bottom:8px">These settings have misspelled names and are being ignored by Creo:</div>`;
+    r.typos.forEach(t => {
+      html += `<div style="background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.2);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+        <div style="font-family:var(--mono);font-size:11px"><span style="color:var(--er);text-decoration:line-through">${esc(t.name)}</span> → <span style="color:var(--ok)">${esc(t.suggestion)}</span></div>
+        <div style="font-size:10px;color:var(--txd);margin-top:3px">Line ${t.lineNum} · Current value: <code>${esc(t.value)}</code></div>
+      </div>`;
+    });
+  }
+
+  // Obsolete
+  if(r.obsolete.length > 0){
+    html += `<div class="sec" style="color:var(--wn)">⚠️ Obsolete or Problematic Settings</div>`;
+    r.obsolete.forEach(o => {
+      html += `<div style="background:var(--wnd);border:1px solid rgba(255,176,32,.2);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--wn)">${esc(o.name)} <span style="color:var(--txd)">= ${esc(o.value)}</span></div>
+        <div style="font-size:10px;color:var(--tx);margin-top:3px">${esc(o.reason)}</div>
+        <div style="font-size:10px;color:var(--txd);margin-top:2px">Line ${o.lineNum}</div>
+      </div>`;
+    });
+  }
+
+  // Suboptimal values
+  if(r.suboptimal.length > 0){
+    html += `<div class="sec" style="color:var(--wn)">🔧 Suboptimal Values (${r.suboptimal.length})</div>
+      <div style="font-size:11px;color:var(--tx);line-height:1.6;margin-bottom:8px">These settings exist but use values that differ from PTC recommendations for typical environments:</div>`;
+    r.suboptimal.slice(0, 15).forEach(s => {
+      html += `<div style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--txb)">${esc(s.name)}</div>
+        <div style="font-size:10px;margin-top:4px;display:flex;gap:12px;flex-wrap:wrap">
+          <span style="color:var(--wn)">Current: <code>${esc(s.currentValue)}</code></span>
+          <span style="color:var(--ok)">Recommended: <code>${esc(s.recommendedValues.join(' | '))}</code></span>
+        </div>
+        <div style="font-size:10px;color:var(--txd);margin-top:3px">${esc(s.category)} · ${esc(s.description)} · Line ${s.lineNum}</div>
+      </div>`;
+    });
+    if(r.suboptimal.length > 15){
+      html += `<div style="font-size:11px;color:var(--txd);text-align:center;padding:8px">... and ${r.suboptimal.length - 15} more. Run the wizard to get a complete recommended config.</div>`;
+    }
+  }
+
+  // Missing recommended
+  if(r.missingRecommended.length > 0){
+    html += `<div class="sec" style="color:var(--ac)">➕ Recommended Settings Missing (${r.missingRecommended.length})</div>
+      <div style="font-size:11px;color:var(--tx);line-height:1.6;margin-bottom:8px">These settings are recommended by PTC/community best practices but not present in your config:</div>`;
+    r.missingRecommended.slice(0, 20).forEach(m => {
+      html += `<div style="background:var(--acd);border:1px solid rgba(45,127,249,.2);border-radius:8px;padding:10px 12px;margin-bottom:6px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ac)">+ ${esc(m.name)} <span style="color:var(--txd)">${esc(m.recommendedValue)}</span></div>
+        <div style="font-size:10px;color:var(--txd);margin-top:3px">${esc(m.category)} · ${esc(m.description)}</div>
+      </div>`;
+    });
+    if(r.missingRecommended.length > 20){
+      html += `<div style="font-size:11px;color:var(--txd);text-align:center;padding:8px">... and ${r.missingRecommended.length - 20} more available via the wizard.</div>`;
+    }
+  }
+
+  // Matched (good)
+  if(r.matchedRecommended.length > 0){
+    html += `<div class="sec" style="color:var(--ok)">✅ Settings Already Optimal (${r.matchedRecommended.length})</div>
+      <div class="tw" style="margin-bottom:12px">`;
+    r.matchedRecommended.slice(0, 30).forEach(m => {
+      html += `<span class="tg" style="color:var(--ok);border-color:rgba(0,214,143,.3)">${esc(m.name)}</span>`;
+    });
+    if(r.matchedRecommended.length > 30) html += `<span class="tg">+${r.matchedRecommended.length - 30} more</span>`;
+    html += `</div>`;
+  }
+
+  // Unknown settings
+  if(r.unknown.length > 0){
+    html += `<div class="sec">❓ Custom / Unknown Settings (${r.unknown.length})</div>
+      <div style="font-size:11px;color:var(--tx);line-height:1.6;margin-bottom:8px">Settings not in our database — could be valid but less common, site-specific customizations, or settings for modules not covered by this tool:</div>
+      <div class="tw">`;
+    r.unknown.slice(0, 20).forEach(u => {
+      html += `<span class="tg" title="${esc(u.value)}">${esc(u.name)}</span>`;
+    });
+    if(r.unknown.length > 20) html += `<span class="tg">+${r.unknown.length - 20} more</span>`;
+    html += `</div>`;
+  }
+
+  // Action buttons
+  html += `<div style="margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <button class="btn bn" onclick="downloadReport()">⬇ Download Full Report</button>
+    <button class="btn br" onclick="resetAnalyzer()">🔄 Analyze Another File</button>
+  </div>
+  <div class="tip" style="margin-top:14px">💡 <b>Want a complete recommended config?</b> Use the wizard to generate a fresh config.pro tailored to your environment. You can then cherry-pick settings from the generated file into your existing config.</div>`;
+
+  return html;
+}
+
+function resetAnalyzer(){analyzerResult=null;render();scrollTo(0,0)}
+
+function downloadReport(){
+  const r = analyzerResult;
+  const lines = [];
+  lines.push('='.repeat(70));
+  lines.push('CREO CONFIG.PRO ANALYSIS REPORT');
+  lines.push('Generated: ' + new Date().toISOString().split('T')[0]);
+  lines.push('='.repeat(70));
+  lines.push('');
+  lines.push('SUMMARY');
+  lines.push('-'.repeat(70));
+  lines.push('Health Score: ' + r.healthScore + '/100');
+  lines.push('Total settings analyzed: ' + r.totalSettings);
+  lines.push('Matching PTC recommendations: ' + r.matchedRecommended.length);
+  lines.push('Suboptimal values: ' + r.suboptimal.length);
+  lines.push('Obsolete/problematic: ' + r.obsolete.length);
+  lines.push('Typos detected: ' + r.typos.length);
+  lines.push('Recommended settings missing: ' + r.missingRecommended.length);
+  lines.push('Unknown/custom settings: ' + r.unknown.length);
+  lines.push('');
+
+  if(r.typos.length){
+    lines.push('CRITICAL: TYPOS (lines are being ignored by Creo)');
+    lines.push('-'.repeat(70));
+    r.typos.forEach(t => {
+      lines.push('  Line ' + t.lineNum + ': ' + t.name + ' -> should be: ' + t.suggestion);
+      lines.push('    Current value: ' + t.value);
+    });
+    lines.push('');
+  }
+
+  if(r.obsolete.length){
+    lines.push('OBSOLETE / PROBLEMATIC SETTINGS');
+    lines.push('-'.repeat(70));
+    r.obsolete.forEach(o => {
+      lines.push('  Line ' + o.lineNum + ': ' + o.name + ' = ' + o.value);
+      lines.push('    Issue: ' + o.reason);
+    });
+    lines.push('');
+  }
+
+  if(r.suboptimal.length){
+    lines.push('SUBOPTIMAL VALUES');
+    lines.push('-'.repeat(70));
+    r.suboptimal.forEach(s => {
+      lines.push('  Line ' + s.lineNum + ': ' + s.name);
+      lines.push('    Current: ' + s.currentValue);
+      lines.push('    Recommended: ' + s.recommendedValues.join(' or '));
+      lines.push('    Category: ' + s.category + ' | ' + s.description);
+    });
+    lines.push('');
+  }
+
+  if(r.missingRecommended.length){
+    lines.push('RECOMMENDED SETTINGS MISSING');
+    lines.push('-'.repeat(70));
+    r.missingRecommended.forEach(m => {
+      lines.push('  + ' + m.name + ' ' + m.recommendedValue);
+      lines.push('    ' + m.category + ' | ' + m.description);
+    });
+    lines.push('');
+  }
+
+  if(r.matchedRecommended.length){
+    lines.push('SETTINGS ALREADY OPTIMAL');
+    lines.push('-'.repeat(70));
+    r.matchedRecommended.forEach(m => {
+      lines.push('  OK  ' + m.name + ' = ' + m.value);
+    });
+    lines.push('');
+  }
+
+  lines.push('='.repeat(70));
+  lines.push('END OF REPORT');
+
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'config_pro_analysis_report.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
 function rP(){const e=document.getElementById('pb');let h='';ST.forEach((s,i)=>{
   h+=`<div class="si ${i<step?'ck':''} ${i===step?'cur':''} ${i>step?'off':''}" ${i<step?'onclick="go('+i+')"':''}>
     <div class="sd ${i<step?'dn':i===step?'on':''}">${i<step?'✓':i+1}</div><span class="sl">${s.t}</span></div>`;
