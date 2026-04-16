@@ -587,6 +587,7 @@ function analyzeConfig(text){
 
   const report = {
     totalSettings: currentKeys.length,
+    originalText: text,
     matchedRecommended: [],
     missingRecommended: [],
     suboptimal: [],
@@ -784,14 +785,257 @@ function sAnalyzerReport(){
     html += `</div>`;
   }
 
-  // Action buttons
-  html += `<div style="margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
-    <button class="btn bn" onclick="downloadReport()">⬇ Download Full Report</button>
+  // Action buttons — highlight the "Generate Optimized" button
+  html += `<div style="background:linear-gradient(135deg,var(--acd),var(--okd));border:1.5px solid var(--ac);border-radius:12px;padding:16px;margin-top:22px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:22px">✨</span>
+      <div>
+        <div style="font-weight:700;color:var(--txb);font-size:13px">Apply All Recommendations Automatically</div>
+        <div style="font-size:11px;color:var(--tx);line-height:1.5;margin-top:2px">Generate a new config.pro that keeps your valid settings intact, fixes typos, applies optimal values, removes obsolete options, and adds missing recommendations.</div>
+      </div>
+    </div>
+    <button class="btn" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--ac),#1a5fd4);color:#fff;font-weight:600;box-shadow:0 4px 14px rgba(45,127,249,.3)" onclick="generateOptimized()">✨ Generate Optimized config.pro →</button>
+  </div>
+
+  <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <button class="btn bb" onclick="downloadReport()">⬇ Download Report (.txt)</button>
     <button class="btn br" onclick="resetAnalyzer()">🔄 Analyze Another File</button>
   </div>
-  <div class="tip" style="margin-top:14px">💡 <b>Want a complete recommended config?</b> Use the wizard to generate a fresh config.pro tailored to your environment. You can then cherry-pick settings from the generated file into your existing config.</div>`;
+  <div class="tip" style="margin-top:14px">💡 <b>Safe approach:</b> The optimized file preserves your custom/site-specific settings (like directory paths and company-specific configurations) and only modifies what the analyzer flagged as problematic or missing.</div>`;
 
   return html;
+}
+
+// ═══ GENERATE OPTIMIZED CONFIG.PRO FROM ANALYSIS ═══
+function generateOptimized(){
+  const r = analyzerResult;
+  const lines = [];
+  const d = new Date().toISOString().split('T')[0];
+
+  lines.push('!===============================================================');
+  lines.push('! config.pro - OPTIMIZED based on automated analysis');
+  lines.push('! Generated: ' + d);
+  lines.push('! Original settings: ' + r.totalSettings);
+  lines.push('! Changes applied:');
+  lines.push('!   - ' + r.typos.length + ' typos corrected');
+  lines.push('!   - ' + r.obsolete.length + ' obsolete/problematic settings removed');
+  lines.push('!   - ' + r.suboptimal.length + ' values optimized');
+  lines.push('!   - ' + r.missingRecommended.length + ' recommended settings added');
+  lines.push('!   - ' + r.matchedRecommended.length + ' already-optimal settings preserved');
+  lines.push('!   - ' + r.unknown.length + ' custom/unknown settings preserved as-is');
+  lines.push('! Health score improvement target: ' + r.healthScore + ' → 90+');
+  lines.push('!===============================================================');
+  lines.push('');
+
+  // Build a set of setting names that were flagged (typos, obsolete, suboptimal)
+  const typoSet = new Set(r.typos.map(t => t.name));
+  const obsoleteSet = new Set(r.obsolete.map(o => o.name));
+  const suboptimalMap = {};
+  r.suboptimal.forEach(s => suboptimalMap[s.name] = s);
+
+  // ═══ SECTION 1: Preserved settings (matched + unknown) ═══
+  lines.push('!--- Your Existing Settings (Preserved) ---');
+  lines.push('! These settings were already optimal or are custom to your environment.');
+  lines.push('');
+
+  // Parse original to preserve order for preserved settings
+  const originalLines = r.originalText.split('\n');
+  let preservedCount = 0;
+  originalLines.forEach(raw => {
+    const line = raw.trim();
+    if(!line || line.startsWith('!') || line.startsWith('#') || line.startsWith('//')) return;
+    const parts = line.split(/\s+/);
+    const name = parts[0].toLowerCase();
+    if(!/^[a-z_][a-z0-9_]*$/.test(name)) return;
+    // Skip if it's being fixed/removed
+    if(typoSet.has(name) || obsoleteSet.has(name) || suboptimalMap[name]) return;
+    // Keep it
+    lines.push(raw.trim());
+    preservedCount++;
+  });
+  if(preservedCount === 0) lines.push('! (none)');
+  lines.push('');
+
+  // ═══ SECTION 2: Corrections ═══
+  if(r.typos.length > 0){
+    lines.push('!--- Corrected Typos ---');
+    lines.push('! These setting names were misspelled and being ignored by Creo.');
+    lines.push('');
+    r.typos.forEach(t => {
+      lines.push('! Was: ' + t.name + ' (typo, ignored by Creo)');
+      lines.push(t.suggestion + ' ' + t.value);
+    });
+    lines.push('');
+  }
+
+  // ═══ SECTION 3: Obsolete removed ═══
+  if(r.obsolete.length > 0){
+    lines.push('!--- Obsolete Settings Removed ---');
+    lines.push('! These settings were flagged as problematic and have been commented out.');
+    lines.push('! Review and delete these comments once validated.');
+    lines.push('');
+    r.obsolete.forEach(o => {
+      lines.push('! REMOVED: ' + o.name + ' ' + o.value);
+      lines.push('!   Reason: ' + o.reason);
+    });
+    lines.push('');
+  }
+
+  // ═══ SECTION 4: Optimized values ═══
+  if(r.suboptimal.length > 0){
+    lines.push('!--- Values Optimized ---');
+    lines.push('! These settings have been updated to PTC-recommended values.');
+    lines.push('');
+    const byCat = {};
+    r.suboptimal.forEach(s => {
+      if(!byCat[s.category]) byCat[s.category] = [];
+      byCat[s.category].push(s);
+    });
+    Object.keys(byCat).sort().forEach(cat => {
+      lines.push('! ' + cat);
+      byCat[cat].forEach(s => {
+        // Pick the first recommended value (most common case)
+        const newVal = s.recommendedValues[0];
+        lines.push('! Was: ' + s.name + ' ' + s.currentValue);
+        lines.push(s.name + ' ' + newVal);
+      });
+      lines.push('');
+    });
+  }
+
+  // ═══ SECTION 5: New recommended settings added ═══
+  if(r.missingRecommended.length > 0){
+    lines.push('!--- New Recommended Settings Added ---');
+    lines.push('! Best-practice settings that were missing from your config.');
+    lines.push('');
+    const byCat = {};
+    r.missingRecommended.forEach(m => {
+      if(!byCat[m.category]) byCat[m.category] = [];
+      byCat[m.category].push(m);
+    });
+    Object.keys(byCat).sort().forEach(cat => {
+      lines.push('! ' + cat);
+      byCat[cat].forEach(m => {
+        lines.push(m.name + ' ' + m.recommendedValue);
+      });
+      lines.push('');
+    });
+  }
+
+  lines.push('!===============================================================');
+  lines.push('! END OF OPTIMIZED CONFIG.PRO');
+  lines.push('! Next steps:');
+  lines.push('!   1. Review the changes above carefully');
+  lines.push('!   2. Test this config with Creo before deploying');
+  lines.push('!   3. Remove commented-out obsolete lines once validated');
+  lines.push('!===============================================================');
+
+  // Store and show result
+  optimizedResult = lines.join('\n');
+  showOptimizedReport();
+}
+
+let optimizedResult = null;
+
+function showOptimizedReport(){
+  const e = document.getElementById('sc');
+  e.className = 'card fi';
+  const r = analyzerResult;
+  const changesCount = r.typos.length + r.obsolete.length + r.suboptimal.length + r.missingRecommended.length;
+  
+  let html = `<div style="text-align:center;margin-bottom:18px">
+    <div style="font-size:40px;margin-bottom:8px">✨</div>
+    <h3 style="font-size:18px;font-weight:700;color:var(--txb);margin-bottom:4px">Optimized config.pro Ready</h3>
+    <p style="color:var(--txd);font-size:12px;line-height:1.6">Your original file has been analyzed and optimized based on PTC recommendations</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px">
+    <div style="background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);border-radius:10px;padding:10px;text-align:center">
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--er)">${r.typos.length}</div>
+      <div style="font-size:9px;color:var(--txd);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">Typos Fixed</div>
+    </div>
+    <div style="background:var(--wnd);border:1px solid rgba(255,176,32,.2);border-radius:10px;padding:10px;text-align:center">
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--wn)">${r.obsolete.length}</div>
+      <div style="font-size:9px;color:var(--txd);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">Obsolete Removed</div>
+    </div>
+    <div style="background:var(--acd);border:1px solid rgba(45,127,249,.3);border-radius:10px;padding:10px;text-align:center">
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ac)">${r.suboptimal.length}</div>
+      <div style="font-size:9px;color:var(--txd);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">Values Optimized</div>
+    </div>
+    <div style="background:var(--okd);border:1px solid rgba(0,214,143,.3);border-radius:10px;padding:10px;text-align:center">
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ok)">${r.missingRecommended.length}</div>
+      <div style="font-size:9px;color:var(--txd);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">Recommendations Added</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="btn bd" onclick="downloadOptimized()">⬇ Download Optimized config.pro</button>
+    <button class="btn bc" id="cpoBtn" onclick="copyOptimized()">📋 Copy</button>
+  </div>
+
+  <div class="sec">Preview of Optimized config.pro</div>
+  <div class="cp2">`;
+
+  optimizedResult.split('\n').forEach((l, i) => {
+    let lh = '';
+    if(l.startsWith('!')){
+      lh = `<span style="color:#4a5568">${esc(l)}</span>`;
+    } else if(l.includes(' ') && l.trim()){
+      const p = l.split(' ');
+      lh = `<span style="color:#7eb8f7">${esc(p[0])}</span> <span style="color:#a5d6ff">${esc(p.slice(1).join(' '))}</span>`;
+    } else {
+      lh = esc(l);
+    }
+    html += `<div class="cl"><span class="ln">${i+1}</span>${lh}</div>`;
+  });
+  html += `</div>
+
+  <div class="wb" style="margin-top:14px">⚠️ <b>Important:</b> Always test this optimized config.pro in a non-production environment before rolling out to all users. Some settings may behave differently based on your specific Creo version, hardware, and workflow.</div>
+  
+  <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <button class="btn bb" onclick="showAnalysisReport()">← Back to Analysis Report</button>
+    <button class="btn br" onclick="resetAnalyzer()">🔄 Analyze Another File</button>
+  </div>`;
+
+  e.innerHTML = html;
+  scrollTo(0, 0);
+}
+
+function showAnalysisReport(){
+  const e = document.getElementById('sc');
+  e.className = 'card fi';
+  e.innerHTML = sAnalyzerReport();
+  scrollTo(0, 0);
+}
+
+function downloadOptimized(){
+  const blob = new Blob([optimizedResult], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'config_optimized.pro';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyOptimized(){
+  navigator.clipboard.writeText(optimizedResult).then(() => {
+    const b = document.getElementById('cpoBtn');
+    b.className = 'btn bc cp';
+    b.textContent = '✓ Copied!';
+    setTimeout(() => { b.className = 'btn bc'; b.textContent = '📋 Copy'; }, 2000);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = optimizedResult;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const b = document.getElementById('cpoBtn');
+    b.className = 'btn bc cp';
+    b.textContent = '✓ Copied!';
+    setTimeout(() => { b.className = 'btn bc'; b.textContent = '📋 Copy'; }, 2000);
+  });
 }
 
 function resetAnalyzer(){analyzerResult=null;render();scrollTo(0,0)}
